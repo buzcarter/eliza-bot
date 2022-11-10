@@ -1,21 +1,71 @@
-var elizabot = require('./elizabot.js');
+const elizabot = require('./elizabot.js');
 
-elizabot.start() // initializes eliza and returns a greeting message
+const SILENCE_LENGTH = 15000;
+const MAX_NUMBER_OF_SILENCES = 4;
 
-function say(question) {
-  let reply = elizabot.reply(question) // returns a eliza-like reply based on the message text passed into it
-  console.log(question);
-  console.log(reply);
-  console.log('---');
+let lastInteractionTime = Date.now();
+let numberOfSilences = 0;
+
+const silencePrompts = [
+  'You seem distracted. Should we resume later?',
+  'If you\'re busy we can pick up where we\'ve left off later',
+  'Perhaps this is a good stopping point. We can do this later if you like.',
+  'Should we stop here?',
+  'You seem reluctant to chat. Is anything else bothering you?',
+  'Do you need to work on something else?',
+  'Is this not a good time?',
+];
+
+const silenceTerminations = [
+  'Let\'s stop here and pickup later when you\'re able to chat with without interrruptions. I\'m here whenever you\'d like, you know that',
+]
+
+function stop() {
+  process.exit(0);
 }
 
-say("Hi")
-say("I am tired")
-say("Yup")
-say("Very likely")
-say("no")
-say("Because it makes me feel better")
-say("not really")
+function randomPrompt() {
+  const nowTime = Date.now();
+  const silenceComfort = Math.floor(Math.random() * (3 * SILENCE_LENGTH) + SILENCE_LENGTH);
 
-reply = elizabot.bye() // returns a farewell message
-console.log(reply);
+  if (numberOfSilences > MAX_NUMBER_OF_SILENCES) {
+    const goodbye = silenceTerminations[Math.floor(Math.random() * silenceTerminations.length)];
+    console.log(goodbye);
+    stop();
+  }
+
+  if (nowTime - lastInteractionTime > silenceComfort) {
+    const prompt = silencePrompts[Math.floor(Math.random() * silencePrompts.length)];
+    console.log(prompt);
+    lastInteractionTime = Date.now();
+    numberOfSilences++;
+  }
+}
+
+function provideFeedback(patientQuery){
+  lastInteractionTime = Date.now();
+  numberOfSilences = 0;
+  if (patientQuery.toLowerCase() === 'quit' || patientQuery.toLowerCase() === 'q') {
+    const goodbye = elizabot.bye();
+    console.log(goodbye);
+    stop();
+  }
+
+  const reply = elizabot.reply(patientQuery);
+  console.log(reply);
+}
+
+function main() {
+  const hello = elizabot.start();
+  console.log(hello);
+
+  setInterval(randomPrompt, SILENCE_LENGTH);
+
+  const stdin = process.openStdin();
+  stdin.addListener('data', (inputText) => {
+    inputText = inputText.toString().trim();
+    provideFeedback(inputText)
+  });
+}
+
+main();
