@@ -1,0 +1,37 @@
+{
+  "name": "eliza-bot",
+  "version": "1.0.0",
+  "description": "JavaScript implementation of ELIZA chatbot",
+  "main": "index.js",
+  "engines": {
+    "node": "16",
+    "npm": "8"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oren/eliza-bot.git"
+  },
+  "keywords": [
+    "bot",
+    "eliza",
+    "chat",
+    "phonetree",
+    "language"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/oren/eliza-bot/issues"
+  },
+  "homepage": "https://github.com/oren/eliza-bot#readme",
+  "devDependencies": {
+    "eslint": "^8.26.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0"
+  }
+}

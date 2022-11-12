@@ -1,1 +1,9 @@
-tags
+# **/*.gitignore
+
+# Our Gulp Build Files
+node_modules/
+
+# Files from difference tools
+**/*.bak
+
+# Operating system files
