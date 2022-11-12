@@ -1,11 +1,11 @@
-/* eslint-disable no-underscore-dangle */
 const langConfig = require('./languageConfig');
 
 const pickRandom = (ary) => ((!ary) ? '' : ary[Math.floor(Math.random() * ary.length)]);
 
 class ElizaBot {
+  #dataParsed = null;
+
   /*
-  _dataParsed = null;
   capitalizeFirstLetter = null;
   debug = null;
   elizaKeywords = null;
@@ -42,10 +42,10 @@ class ElizaBot {
     this.memSize = 20;
     this.version = '1.1 (original)';
 
-    this._dataParsed = false;
-    if (!this._dataParsed) {
-      this._init();
-      this._dataParsed = true;
+    this.#dataParsed = false;
+    if (!this.#dataParsed) {
+      this.#init();
+      this.#dataParsed = true;
     }
     this.reset();
   }
@@ -62,7 +62,7 @@ class ElizaBot {
     }
   }
 
-  _init() {
+  #init() {
     // parse data and convert it from canonical form to internal use
     // prodoce synonym list
     const synPatterns = {};
@@ -146,7 +146,7 @@ class ElizaBot {
       }
     }
     // now sort keywords by rank (highest first)
-    this.elizaKeywords.sort(this._sortKeywords);
+    this.elizaKeywords.sort(this.#sortKeywords);
 
     // and compose regexps and refs for pres and posts
     this.pres = {};
@@ -182,11 +182,11 @@ class ElizaBot {
       this.elizaQuits = [];
     }
     // done
-    this._dataParsed = true;
+    this.#dataParsed = true;
   }
 
   // eslint-disable-next-line class-methods-use-this
-  _sortKeywords(a, b) {
+  #sortKeywords(a, b) {
     // sort by rank
     if (a[1] > b[1]) return -1;
     if (a[1] < b[1]) return 1;
@@ -238,25 +238,25 @@ class ElizaBot {
         // loop trough keywords
         for (let k = 0; k < this.elizaKeywords.length; k++) {
           if (part.search(new RegExp(`\\b${this.elizaKeywords[k][0]}\\b`, 'i')) >= 0) {
-            rpl = this._execRule(k);
+            rpl = this.#execRule(k);
           }
           if (rpl !== '') return rpl;
         }
       }
     }
     // nothing matched try mem
-    rpl = this._memGet();
+    rpl = this.#memGet();
     // if nothing in mem, so try xnone
     if (rpl === '') {
       this.sentence = ' ';
-      const k = this._getRuleIndexByKey('xnone');
-      if (k >= 0) rpl = this._execRule(k);
+      const k = this.#getRuleIndexByKey('xnone');
+      if (k >= 0) rpl = this.#execRule(k);
     }
     // return reply or default string
     return (rpl !== '') ? rpl : 'I am at a loss for words.';
   }
 
-  _execRule(k) {
+  #execRule(k) {
     const rule = this.elizaKeywords[k];
     const decomps = rule[2];
     const paramre = /\(([0-9]+)\)/;
@@ -285,8 +285,8 @@ class ElizaBot {
           }\nmemflag: ${memflag}`);
         }
         if (rpl.search('^goto ', 'i') === 0) {
-          const ki = this._getRuleIndexByKey(rpl.substring(5));
-          if (ki >= 0) return this._execRule(ki);
+          const ki = this.#getRuleIndexByKey(rpl.substring(5));
+          if (ki >= 0) return this.#execRule(ki);
         }
         // substitute positional params (v.1.1: work around lambda function)
         let m1 = paramre.exec(rpl);
@@ -313,8 +313,8 @@ class ElizaBot {
           }
           rpl = lp + rp;
         }
-        rpl = this._postTransform(rpl);
-        if (memflag) this._memSave(rpl);
+        rpl = this.#postTransform(rpl);
+        if (memflag) this.#memSave(rpl);
         else return rpl;
       }
     }
@@ -322,7 +322,7 @@ class ElizaBot {
   }
 
   /* eslint-disable no-param-reassign */
-  _postTransform(s) {
+  #postTransform(s) {
     // final cleanings
     s = s.replace(/\s{2,}/g, ' ');
     s = s.replace(/\s+\./g, '.');
@@ -342,19 +342,19 @@ class ElizaBot {
   }
   /* eslint-enable no-param-reassign */
 
-  _getRuleIndexByKey(key) {
+  #getRuleIndexByKey(key) {
     for (let k = 0; k < this.elizaKeywords.length; k++) {
       if (this.elizaKeywords[k][0] === key) return k;
     }
     return -1;
   }
 
-  _memSave(t) {
+  #memSave(t) {
     this.mem.push(t);
     if (this.mem.length > this.memSize) this.mem.shift();
   }
 
-  _memGet() {
+  #memGet() {
     if (this.mem.length) {
       if (this.noRandom) return this.mem.shift();
 
