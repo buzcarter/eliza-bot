@@ -1,9 +1,14 @@
 const ElizaBot = require('./ElizaBotClass');
 
+const options = {
+  noRandom: false,
+  debugEnabled: true,
+};
+
 let bot = null;
 
 // eslint-disable-next-line no-return-assign
-const getBot = () => (bot || (bot = new ElizaBot(false)));
+const getBot = () => (bot || (bot = new ElizaBot(options)));
 
 module.exports = {
   reply(patientInput) {

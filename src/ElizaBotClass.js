@@ -27,16 +27,22 @@ class ElizaBot {
   version = null;
   */
 
-  constructor(noRandomFlag) {
+  /**
+   * @param {object} opts
+   * @param {boolean} opts.debugEnabled
+   * @param {boolean} opts.noRandom
+   */
+  constructor(opts) {
     this.elizaKeywords = langConfig.keywords;
     this.elizaPostTransforms = langConfig.postTransforms;
     this.elizaPres = langConfig.pres;
     this.elizaPosts = langConfig.post;
     this.elizaSynons = langConfig.synonyms;
 
-    this.noRandom = !!(noRandomFlag);
+    const { debugEnabled, noRandom } = opts || {};
+    this.noRandom = Boolean(noRandom);
     this.capitalizeFirstLetter = true;
-    this.debug = false;
+    this.debug = Boolean(debugEnabled);
     this.memSize = 20;
     this.version = '1.1 (original)';
 
@@ -276,12 +282,8 @@ class ElizaBot {
         }
         let rpl = reasmbs[ri];
         if (this.debug) {
-          // eslint-disable-next-line no-alert
-          alert(`match:\nkey: ${this.elizaKeywords[k][0]
-          }\nrank: ${this.elizaKeywords[k][1]
-          }\ndecomp: ${decomps[i][0]
-          }\nreasmb: ${rpl
-          }\nmemflag: ${memflag}`);
+          // eslint-disable-next-line no-console
+          console.log(`match:\nkey: ${this.elizaKeywords[k][0]}\nrank: ${this.elizaKeywords[k][1]}\ndecomp: ${decomps[i][0]}\nreasmb: ${rpl}\nmemflag: ${memflag}`);
         }
         if (rpl.search('^goto ', 'i') === 0) {
           const ki = this.#getRuleIndexByKey(rpl.substring(5));
