@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const elizabot = require('./elizabot.js');
+const elizabot = require('./src/elizabot.js');
 
 const SILENCE_LENGTH = 15000;
 const MAX_NUMBER_OF_SILENCES = 4;
