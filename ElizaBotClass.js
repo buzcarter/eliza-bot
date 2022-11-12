@@ -70,6 +70,7 @@ class ElizaBot {
     const synPatterns = {};
 
     if ((this.elizaSynons) && (typeof this.elizaSynons === 'object')) {
+      // eslint-disable-next-line guard-for-in, no-restricted-syntax
       for (const i in this.elizaSynons) synPatterns[i] = `(${i}|${this.elizaSynons[i].join('|')})`;
     }
     // check for keywords or install empty structure to prevent any errors
@@ -94,9 +95,9 @@ class ElizaBot {
       for (let i = 0; i < rules.length; i++) {
         const r = rules[i];
         // check mem flag and store it as decomp's element 2
-        if (r[0].charAt(0) == '$') {
+        if (r[0].charAt(0) === '$') {
           let ofs = 1;
-          while (r[0].charAt[ofs] == ' ') ofs++;
+          while (r[0].charAt[ofs] === ' ') ofs++;
           r[0] = r[0].substring(ofs);
           r[2] = true;
         } else {
@@ -119,9 +120,9 @@ class ElizaBot {
             let rp = r[0];
             while (m) {
               lp += rp.substring(0, m.index + 1);
-              if (m[1] != ')') lp += '\\b';
+              if (m[1] !== ')') lp += '\\b';
               lp += '\\s*(.*)\\s*';
-              if ((m[2] != '(') && (m[2] != '\\')) lp += '\\b';
+              if ((m[2] !== '(') && (m[2] !== '\\')) lp += '\\b';
               lp += m[2];
               rp = rp.substring(m.index + m[0].length);
               m = are.exec(rp);
@@ -131,13 +132,13 @@ class ElizaBot {
           m = are1.exec(r[0]);
           if (m) {
             let lp = '\\s*(.*)\\s*';
-            if ((m[1] != ')') && (m[1] != '\\')) lp += '\\b';
+            if ((m[1] !== ')') && (m[1] !== '\\')) lp += '\\b';
             r[0] = lp + r[0].substring(m.index - 1 + m[0].length);
           }
           m = are2.exec(r[0]);
           if (m) {
             let lp = r[0].substring(0, m.index + 1);
-            if (m[1] != '(') lp += '\\b';
+            if (m[1] !== '(') lp += '\\b';
             r[0] = `${lp}\\s*(.*)\\s*`;
           }
         }
@@ -185,6 +186,7 @@ class ElizaBot {
     this._dataParsed = true;
   }
 
+  // eslint-disable-next-line class-methods-use-this
   _sortKeywords(a, b) {
     // sort by rank
     if (a[1] > b[1]) return -1;
@@ -198,21 +200,25 @@ class ElizaBot {
   transform(text) {
     let rpl = '';
     this.quit = false;
+
+    /* eslint-disable no-param-reassign */
     // unify text string
     text = text.toLowerCase();
     text = text.replace(/@#\$%\^&\*\(\)_\+=~`\{\[\}\]\|:;<>\/\\\t/g, ' ');
     text = text.replace(/\s+-+\s+/g, '.');
-    text = text.replace(/\s*[,\.\?!;]+\s*/g, '.');
+    text = text.replace(/\s*[,.?!;]+\s*/g, '.');
     text = text.replace(/\s*\bbut\b\s*/g, '.');
     text = text.replace(/\s{2,}/g, ' ');
+    /* eslint-enable no-param-reassign */
+
     // split text in part sentences and loop through them
     const parts = text.split('.');
     for (let i = 0; i < parts.length; i++) {
       let part = parts[i];
-      if (part != '') {
+      if (part !== '') {
         // check for quit expression
         for (let q = 0; q < this.elizaQuits.length; q++) {
-          if (this.elizaQuits[q] == part) {
+          if (this.elizaQuits[q] === part) {
             this.quit = true;
             return this.getFinal();
           }
@@ -235,20 +241,20 @@ class ElizaBot {
           if (part.search(new RegExp(`\\b${this.elizaKeywords[k][0]}\\b`, 'i')) >= 0) {
             rpl = this._execRule(k);
           }
-          if (rpl != '') return rpl;
+          if (rpl !== '') return rpl;
         }
       }
     }
     // nothing matched try mem
     rpl = this._memGet();
     // if nothing in mem, so try xnone
-    if (rpl == '') {
+    if (rpl === '') {
       this.sentence = ' ';
       const k = this._getRuleIndexByKey('xnone');
       if (k >= 0) rpl = this._execRule(k);
     }
     // return reply or default string
-    return (rpl != '') ? rpl : 'I am at a loss for words.';
+    return (rpl !== '') ? rpl : 'I am at a loss for words.';
   }
 
   _execRule(k) {
@@ -257,11 +263,11 @@ class ElizaBot {
     const paramre = /\(([0-9]+)\)/;
     for (let i = 0; i < decomps.length; i++) {
       const m = this.sentence.match(decomps[i][0]);
-      if (m != null) {
+      if (m !== null) {
         const reasmbs = decomps[i][1];
         const memflag = decomps[i][2];
         let ri = (this.noRandom) ? 0 : Math.floor(Math.random() * reasmbs.length);
-        if (((this.noRandom) && (this.lastchoice[k][i] > ri)) || (this.lastchoice[k][i] == ri)) {
+        if (((this.noRandom) && (this.lastchoice[k][i] > ri)) || (this.lastchoice[k][i] === ri)) {
           ri = ++this.lastchoice[k][i];
           if (ri >= reasmbs.length) {
             ri = 0;
@@ -279,7 +285,7 @@ class ElizaBot {
           }\nreasmb: ${rpl
           }\nmemflag: ${memflag}`);
         }
-        if (rpl.search('^goto ', 'i') == 0) {
+        if (rpl.search('^goto ', 'i') === 0) {
           const ki = this._getRuleIndexByKey(rpl.substring(5));
           if (ki >= 0) return this._execRule(ki);
         }
@@ -289,7 +295,7 @@ class ElizaBot {
           let lp = '';
           let rp = rpl;
           while (m1) {
-            let param = m[parseInt(m1[1])];
+            let param = m[parseInt(m1[1], 10)];
             // postprocess param
             let m2 = this.postExp.exec(param);
             if (m2) {
@@ -316,6 +322,7 @@ class ElizaBot {
     return '';
   }
 
+  /* eslint-disable no-param-reassign */
   _postTransform(s) {
     // final cleanings
     s = s.replace(/\s{2,}/g, ' ');
@@ -334,10 +341,11 @@ class ElizaBot {
     }
     return s;
   }
+  /* eslint-enable no-param-reassign */
 
   _getRuleIndexByKey(key) {
     for (let k = 0; k < this.elizaKeywords.length; k++) {
-      if (this.elizaKeywords[k][0] == key) return k;
+      if (this.elizaKeywords[k][0] === key) return k;
     }
     return -1;
   }
