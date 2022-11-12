@@ -15,4 +15,7 @@ module.exports = {
   bye() {
     return getBot().getFinal();
   },
+  hasQuit() {
+    return getBot().quit;
+  },
 };

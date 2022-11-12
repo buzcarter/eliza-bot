@@ -29,6 +29,7 @@ const silenceTerminations = [
 ];
 
 function endSession() {
+  console.log(asciiDuck);
   process.exit(0);
 }
 
@@ -53,15 +54,12 @@ function randomPrompt() {
 function provideFeedback(patientQuery) {
   lastInteractionTime = Date.now();
   numberOfSilences = 0;
-  if (patientQuery.toLowerCase() === 'quit' || patientQuery.toLowerCase() === 'q') {
-    const goodbye = elizabot.bye();
-    console.log(goodbye);
-    console.log(asciiDuck);
-    endSession();
-  }
 
   const reply = elizabot.reply(patientQuery);
   console.log(reply);
+  if (elizabot.hasQuit()) {
+    endSession();
+  }
 }
 
 function main() {
