@@ -12,7 +12,6 @@ class ElizaBot {
   elizaPosts = null;
   elizaPostTransforms = null;
   elizaPres = null;
-  elizaQuits = null;
   elizaSynons = null;
   getFinal = null;
   lastchoice = null;
@@ -31,7 +30,6 @@ class ElizaBot {
   constructor(noRandomFlag) {
     this.elizaKeywords = langConfig.keywords;
     this.elizaPostTransforms = langConfig.postTransforms;
-    this.elizaQuits = langConfig.quitCommands;
     this.elizaPres = langConfig.pres;
     this.elizaPosts = langConfig.post;
     this.elizaSynons = langConfig.synonyms;
@@ -177,10 +175,12 @@ class ElizaBot {
       this.postExp = /####/;
       this.posts['####'] = '####';
     }
-    // check for elizaQuits and install default if missing
-    if ((!this.elizaQuits) || (typeof this.elizaQuits.length === 'undefined')) {
-      this.elizaQuits = [];
+
+    // check for langConfig.quitCommands and install default if missing
+    if (!Array.isArray(langConfig.quitCommands)) {
+      langConfig.quitCommands = [];
     }
+
     // done
     this.#dataParsed = true;
   }
@@ -216,12 +216,11 @@ class ElizaBot {
       let part = parts[i];
       if (part !== '') {
         // check for quit expression
-        for (let q = 0; q < this.elizaQuits.length; q++) {
-          if (this.elizaQuits[q] === part) {
-            this.quit = true;
-            return this.getFinal();
-          }
+        if (langConfig.quitCommands.includes(part)) {
+          this.quit = true;
+          return this.getFinal();
         }
+
         // preprocess (v.1.1: work around lambda function)
         let m = this.preExp.exec(part);
         if (m) {
