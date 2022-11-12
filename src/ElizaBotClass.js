@@ -1,4 +1,5 @@
 const langConfig = require('./languageConfig');
+const ElizaMemory = require('./elizaMemory');
 
 const pickRandom = (ary) => ((!ary) ? '' : ary[Math.floor(Math.random() * ary.length)]);
 
@@ -15,8 +16,6 @@ class ElizaBot {
   elizaSynons = null;
   getFinal = null;
   lastchoice = null;
-  mem = null;
-  memSize = null;
   noRandom = null;
   postExp = null;
   posts = null;
@@ -43,9 +42,9 @@ class ElizaBot {
     this.noRandom = Boolean(noRandom);
     this.capitalizeFirstLetter = true;
     this.debug = Boolean(debugEnabled);
-    this.memSize = 20;
     this.version = '1.1 (original)';
 
+    this.elizeMem = new ElizaMemory(opts);
     this.#dataParsed = false;
     if (!this.#dataParsed) {
       this.#init();
@@ -56,7 +55,7 @@ class ElizaBot {
 
   reset() {
     this.quit = false;
-    this.mem = [];
+    this.elizeMem.reset();
     this.lastchoice = [];
 
     for (let k = 0; k < this.elizaKeywords.length; k++) {
@@ -250,7 +249,7 @@ class ElizaBot {
       }
     }
     // nothing matched try mem
-    rpl = this.#memGet();
+    rpl = this.elizeMem.get();
     // if nothing in mem, so try xnone
     if (rpl === '') {
       this.sentence = ' ';
@@ -315,7 +314,7 @@ class ElizaBot {
           rpl = lp + rp;
         }
         rpl = this.#postTransform(rpl);
-        if (memflag) this.#memSave(rpl);
+        if (memflag) this.elizeMem.save(rpl);
         else return rpl;
       }
     }
@@ -348,23 +347,6 @@ class ElizaBot {
       if (this.elizaKeywords[k][0] === key) return k;
     }
     return -1;
-  }
-
-  #memSave(t) {
-    this.mem.push(t);
-    if (this.mem.length > this.memSize) this.mem.shift();
-  }
-
-  #memGet() {
-    if (this.mem.length) {
-      if (this.noRandom) return this.mem.shift();
-
-      const n = Math.floor(Math.random() * this.mem.length);
-      const rpl = this.mem[n];
-      for (let i = n + 1; i < this.mem.length; i++) this.mem[i - 1] = this.mem[i];
-      this.mem.length--;
-      return rpl;
-    } return '';
   }
 
   // eslint-disable-next-line class-methods-use-this
