@@ -8,24 +8,24 @@ const initials = [
   "Thanks for waking me up"
 ];
 
+/**
+ * Array of (see below)
+ *
+ * @example
+ *  ["<key>", <rank>, [
+ *    ["<decomp>", [
+ *      "<reasmb>",
+ *      "<reasmb>",
+ *      "<reasmb>"
+ *    ]],
+ *    ["<decomp>", [
+ *      "<reasmb>",
+ *      "<reasmb>",
+ *      "<reasmb>"
+ *    ]]
+ *  ]]
+ */
 const keywords = [
-
-  /*
-    Array of
-    ["<key>", <rank>, [
-      ["<decomp>", [
-        "<reasmb>",
-        "<reasmb>",
-        "<reasmb>"
-      ]],
-      ["<decomp>", [
-        "<reasmb>",
-        "<reasmb>",
-        "<reasmb>"
-      ]]
-    ]]
-  */
-
   ["xnone", 0, [
     ["*", [
       "I'm not sure I understand you fully.",
@@ -556,12 +556,12 @@ const keywords = [
 ];
 
 const postTransforms = [
-  / old old/g, " old",
-  /\bthey were( not)? me\b/g, "it was$1 me",
-  /\bthey are( not)? me\b/g, "it is$1 me",
-  /Are they( always)? me\b/, "it is$1 me",
+  / old old/g,                 " old",
+  /\bthey were( not)? me\b/g,  "it was$1 me",
+  /\bthey are( not)? me\b/g,   "it is$1 me",
+  /Are they( always)? me\b/,   "it is$1 me",
   /\bthat your( own)? (\w+)( now)? \?/, "that you have your$1 $2 ?",
-  /\bI to have (\w+)/, "I have $1",
+  /\bI to have (\w+)/,         "I have $1",
   /Earlier you said your( own)? (\w+)( now)?\./, "Earlier you talked about your $2."
 ];
 
@@ -583,47 +583,47 @@ const quits = [
 ];
 
 const pres = [
-  "dont", "don't",
-  "cant", "can't",
-  "wont", "won't",
-  "recollect", "remember",
-  "recall", "remember",
-  "dreamt", "dreamed",
-  "dreams", "dream",
-  "maybe", "perhaps",
-  "certainly", "yes",
-  "machine", "computer",
-  "machines", "computer",
-  "computers", "computer",
-  "were", "was",
-  "you're", "you are",
-  "i'm", "i am",
-  "same", "alike",
-  "identical", "alike",
-  "equivalent", "alike"
+  "dont",         "don't",
+  "cant",         "can't",
+  "wont",         "won't",
+  "recollect",    "remember",
+  "recall",       "remember",
+  "dreamt",       "dreamed",
+  "dreams",       "dream",
+  "maybe",        "perhaps",
+  "certainly",    "yes",
+  "machine",      "computer",
+  "machines",     "computer",
+  "computers",    "computer",
+  "were",         "was",
+  "you're",       "you are",
+  "i'm",          "i am",
+  "same",         "alike",
+  "identical",    "alike",
+  "equivalent",   "alike"
 ];
 
 const post = [
-  "am", "are",
-  "your", "my",
-  "me", "you",
-  "myself", "yourself",
+  "am",       "are",
+  "your",     "my",
+  "me",       "you",
+  "myself",   "yourself",
   "yourself", "myself",
-  "i", "you",
-  "you", "I",
-  "my", "your",
-  "i'm", "you are"
+  "i",        "you",
+  "you",      "I",
+  "my",       "your",
+  "i'm",      "you are"
 ];
 
 const synonyms = {
-  "be": ["am", "is", "are", "was"],
-  "belief": ["feel", "think", "believe", "wish"],
-  "cannot": ["can't"],
-  "desire": ["want", "need"],
+  "be":       ["am", "is", "are", "was"],
+  "belief":   ["feel", "think", "believe", "wish"],
+  "cannot":   ["can't"],
+  "desire":   ["want", "need"],
   "everyone": ["everybody", "nobody", "noone"],
-  "family": ["mother", "mom", "father", "dad", "sister", "brother", "wife", "children", "child", "uncle", "aunt", "child"],
-  "happy": ["elated", "glad", "better"],
-  "sad": ["unhappy", "depressed", "sick"]
+  "family":   ["mother", "mom", "father", "dad", "sister", "brother", "wife", "children", "child", "uncle", "aunt", "child"],
+  "happy":    ["elated", "glad", "better"],
+  "sad":      ["unhappy", "depressed", "sick"]
 };
 
 module.exports = {
