@@ -6,6 +6,13 @@ const MAX_NUMBER_OF_SILENCES = 4;
 let lastInteractionTime = Date.now();
 let numberOfSilences = 0;
 
+const asciiDuck = `
+  __
+<(o )___
+ ( ._> /
+  \`---'
+`;
+
 const silencePrompts = [
   'You seem distracted. Should we resume later?',
   'If you\'re busy we can pick up where we\'ve left off later',
@@ -48,6 +55,7 @@ function provideFeedback(patientQuery){
   if (patientQuery.toLowerCase() === 'quit' || patientQuery.toLowerCase() === 'q') {
     const goodbye = elizabot.bye();
     console.log(goodbye);
+    console.log(asciiDuck);
     stop();
   }
 
