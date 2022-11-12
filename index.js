@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const elizabot = require('./elizabot.js');
 
 const SILENCE_LENGTH = 15000;
@@ -25,9 +26,9 @@ const silencePrompts = [
 
 const silenceTerminations = [
   'Let\'s stop here and pickup later when you\'re able to chat with without interrruptions. I\'m here whenever you\'d like, you know that',
-]
+];
 
-function stop() {
+function endSession() {
   process.exit(0);
 }
 
@@ -38,7 +39,7 @@ function randomPrompt() {
   if (numberOfSilences > MAX_NUMBER_OF_SILENCES) {
     const goodbye = silenceTerminations[Math.floor(Math.random() * silenceTerminations.length)];
     console.log(goodbye);
-    stop();
+    endSession();
   }
 
   if (nowTime - lastInteractionTime > silenceComfort) {
@@ -49,14 +50,14 @@ function randomPrompt() {
   }
 }
 
-function provideFeedback(patientQuery){
+function provideFeedback(patientQuery) {
   lastInteractionTime = Date.now();
   numberOfSilences = 0;
   if (patientQuery.toLowerCase() === 'quit' || patientQuery.toLowerCase() === 'q') {
     const goodbye = elizabot.bye();
     console.log(goodbye);
     console.log(asciiDuck);
-    stop();
+    endSession();
   }
 
   const reply = elizabot.reply(patientQuery);
@@ -71,8 +72,9 @@ function main() {
 
   const stdin = process.openStdin();
   stdin.addListener('data', (inputText) => {
+    // eslint-disable-next-line no-param-reassign
     inputText = inputText.toString().trim();
-    provideFeedback(inputText)
+    provideFeedback(inputText);
   });
 }
 
