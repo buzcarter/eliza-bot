@@ -1,13 +1,13 @@
 /* eslint-disable no-underscore-dangle */
-const languageConfig = require('./languageConfig');
+const langConfig = require('./languageConfig');
+
+const pickRandom = (ary) => ((!ary) ? '' : ary[Math.floor(Math.random() * ary.length)]);
 
 class ElizaBot {
   /*
   _dataParsed = null;
   capitalizeFirstLetter = null;
   debug = null;
-  elizaFinals = null;
-  elizaInitials = null;
   elizaKeywords = null;
   elizaPosts = null;
   elizaPostTransforms = null;
@@ -29,14 +29,12 @@ class ElizaBot {
   */
 
   constructor(noRandomFlag) {
-    this.elizaInitials = languageConfig.initials;
-    this.elizaKeywords = languageConfig.keywords;
-    this.elizaPostTransforms = languageConfig.postTransforms;
-    this.elizaFinals = languageConfig.finals;
-    this.elizaQuits = languageConfig.quits;
-    this.elizaPres = languageConfig.pres;
-    this.elizaPosts = languageConfig.post;
-    this.elizaSynons = languageConfig.synonyms;
+    this.elizaKeywords = langConfig.keywords;
+    this.elizaPostTransforms = langConfig.postTransforms;
+    this.elizaQuits = langConfig.quitCommands;
+    this.elizaPres = langConfig.pres;
+    this.elizaPosts = langConfig.post;
+    this.elizaSynons = langConfig.synonyms;
 
     this.noRandom = !!(noRandomFlag);
     this.capitalizeFirstLetter = true;
@@ -149,6 +147,7 @@ class ElizaBot {
     }
     // now sort keywords by rank (highest first)
     this.elizaKeywords.sort(this._sortKeywords);
+
     // and compose regexps and refs for pres and posts
     this.pres = {};
     this.posts = {};
@@ -367,14 +366,14 @@ class ElizaBot {
     } return '';
   }
 
+  // eslint-disable-next-line class-methods-use-this
   getFinal() {
-    if (!this.elizaFinals) return '';
-    return this.elizaFinals[Math.floor(Math.random() * this.elizaFinals.length)];
+    return pickRandom(langConfig.farewells);
   }
 
+  // eslint-disable-next-line class-methods-use-this
   getInitial() {
-    if (!this.elizaInitials) return '';
-    return this.elizaInitials[Math.floor(Math.random() * this.elizaInitials.length)];
+    return pickRandom(langConfig.greetings);
   }
 }
 

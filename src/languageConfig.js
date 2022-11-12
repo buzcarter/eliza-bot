@@ -1,5 +1,5 @@
 /* eslint-disable key-spacing, no-multi-spaces */
-const initials = [
+const greetings = [
   'How do you do.  Please tell me your problem.',
   "Please tell me what's been bothering you.",
   'Is something troubling you ?',
@@ -566,7 +566,7 @@ const postTransforms = [
   /Earlier you said your( own)? (\w+)( now)?\./, 'Earlier you talked about your $2.',
 ];
 
-const finals = [
+const farewells = [
   'Goodbye.  It was nice talking to you.',
   // additions (not original)
   'Goodbye.  This was really a nice talk.',
@@ -575,11 +575,11 @@ const finals = [
   'Maybe we could discuss this moreover in our next session ?   Goodbye.',
 ];
 
-const quits = [
+const quitCommands = [
   'bye',
-  'goodbye',
   'done',
   'exit',
+  'goodbye',
   'quit',
 ];
 
@@ -628,12 +628,12 @@ const synonyms = {
 };
 
 module.exports = {
-  finals,
-  initials,
+  farewells,
+  greetings,
   keywords,
   post,
   postTransforms,
   pres,
   synonyms,
-  quits,
+  quitCommands,
 };
