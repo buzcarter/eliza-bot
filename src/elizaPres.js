@@ -19,24 +19,11 @@ class ElizPres {
   constructor(subsDict) {
     this.#wordSubs = subsDict;
     const values = Object.keys(subsDict);
-    this.#regEx = new RegExp(`\\b(${values.join('|')})\\b`);
+    this.#regEx = new RegExp(`\\b(${values.join('|')})\\b`, 'g');
   }
 
   doSubstitutions(phrase) {
-    if (!this.#regEx.test(phrase)) {
-      return phrase;
-    }
-
-    let matches = this.#regEx.exec(phrase);
-    let result = '';
-    let remaining = phrase;
-    while (matches) {
-      result += remaining.substring(0, matches.index) + this.#wordSubs[matches[1]];
-      remaining = remaining.substring(matches.index + matches[0].length);
-      matches = this.#regEx.exec(remaining);
-    }
-
-    return result + remaining;
+    return `${phrase}`.replace(this.#regEx, (match) => this.#wordSubs[match]);
   }
 }
 
