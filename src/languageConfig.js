@@ -588,26 +588,26 @@ const quitCommands = [
  * * `Hash`: words which are replaced before any transformations;
  * * `Values`: the respective replacement words.
  */
-const pres = [
-  'dont',         "don't",
-  'cant',         "can't",
-  'wont',         "won't",
-  'recollect',    'remember',
-  'recall',       'remember',
-  'dreamt',       'dreamed',
-  'dreams',       'dream',
-  'maybe',        'perhaps',
-  'certainly',    'yes',
-  'machine',      'computer',
-  'machines',     'computer',
-  'computers',    'computer',
-  'were',         'was',
-  "you're",       'you are',
-  "i'm",          'i am',
-  'same',         'alike',
-  'identical',    'alike',
-  'equivalent',   'alike',
-];
+const pres = {
+  dont:         "don't",
+  cant:         "can't",
+  wont:         "won't",
+  recollect:    'remember',
+  recall:       'remember',
+  dreamt:       'dreamed',
+  dreams:       'dream',
+  maybe:        'perhaps',
+  certainly:    'yes',
+  machine:      'computer',
+  machines:     'computer',
+  computers:    'computer',
+  were:         'was',
+  "you're":     'you are',
+  "i'm":        'i am',
+  same:         'alike',
+  identical:    'alike',
+  equivalent:   'alike',
+};
 
 const post = [
   'am',       'are',

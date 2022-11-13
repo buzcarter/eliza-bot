@@ -1,22 +1,24 @@
 /* eslint-disable key-spacing, no-multi-spaces */
-const TestPresubstitutions = [
-  'dont',         "don't",
-  'wont',         "won't",
-  'recall',       'remember',
-  'dreamt',       'dreamed',
-  'computers',    'thinking box',
-  'equivalent',   'alike',
-  'sister',       'aunt',
-];
+const TestPresubstitutions = {
+  dont:         "don't",
+  wont:         "won't",
+  recall:       'remember',
+  dreamt:       'dreamed',
+  computers:    'thinking box',
+  equivalent:   'alike',
+  sister:       'aunt',
+};
 
-const elizaPres = require('./elizaPres');
+const ElizPres = require('./elizaPres');
 
 describe('elizaPres', () => {
+  let elizaPres;
+
   beforeAll(() => {
-    elizaPres.init(TestPresubstitutions);
+    elizaPres = new ElizPres(TestPresubstitutions);
   });
 
-  describe('preprocess', () => {
+  describe('doSubstitutions', () => {
     it('should correctly replace (Happy Path)', () => {
       const tests = [{
         source:         'my tall sister dont or wont recall her purple computers dreamt with ice cream equivalent pizza',
@@ -24,7 +26,7 @@ describe('elizaPres', () => {
       }];
 
       tests.forEach(({ source, expectedResult }) => {
-        const result = elizaPres.preprocess(source);
+        const result = elizaPres.doSubstitutions(source);
         expect(result).toBe(expectedResult);
       });
     });

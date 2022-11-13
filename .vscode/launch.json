@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [{
+    "name": "Jest",
+    "internalConsoleOptions": "openOnSessionStart",
+    "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+    "request": "launch",
+    "type": "node",
+    "args": [
+      "-i"
+    ]
+  }, {
+    "name": "One Jest Module",
+    "internalConsoleOptions": "openOnSessionStart",
+    "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+    "request": "launch",
+    "type": "node",
+    "args": [
+      "-i",
+      "elizPres.test.js"
+    ]
+  }]
+}

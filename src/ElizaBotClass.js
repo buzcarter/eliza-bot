@@ -1,6 +1,6 @@
 const langConfig = require('./languageConfig');
 const ElizaMemory = require('./elizaMemory');
-const elizaPres = require('./elizaPres');
+const ElizPres = require('./elizaPres');
 
 const pickRandom = (ary) => ((!ary) ? '' : ary[Math.floor(Math.random() * ary.length)]);
 
@@ -23,6 +23,8 @@ class ElizaBot {
   sentence = null;
   version = null;
   */
+
+  #elizaPres = null;
 
   /**
    * @param {object} opts
@@ -151,7 +153,7 @@ class ElizaBot {
     // and compose regexps and refs for pres and posts
     this.posts = {};
 
-    elizaPres.init(langConfig.pres);
+    this.#elizaPres = new ElizPres(langConfig.pres);
 
     if ((this.elizaPosts) && (this.elizaPosts.length)) {
       const a = [];
@@ -211,7 +213,7 @@ class ElizaBot {
           return this.getFinal();
         }
 
-        part = elizaPres.preprocess(part);
+        part = this.#elizaPres.doSubstitutions(part);
         this.sentence = part;
         // loop trough keywords
         for (let k = 0; k < this.elizaKeywords.length; k++) {

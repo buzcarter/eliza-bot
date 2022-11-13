@@ -2,7 +2,7 @@ const ElizaBot = require('./ElizaBotClass');
 
 const options = {
   noRandom: false,
-  debugEnabled: true,
+  debugEnabled: false,
 };
 
 let bot = null;

@@ -1,54 +1,43 @@
 /**
- * # preprocess()
- * `preprocess()` applies simple substitution rules to the input string.
+ * # doSubstitutions()
+ * `doSubstitutions()` applies simple substitution rules to the input string.
  * Mostly this is to catch varieties in spelling, misspellings, contractions and the like.
  *
- * `preprocess()` is called from within the transform() method.
+ * `doSubstitutions()` is called from within the transform() method.
  * It is applied to user-input text, BEFORE any processing, and before a reassebly statement has been selected.
  *
  * It uses the array %pre, which is created during the parse of the script.
  *
  * @example
- *   userStmt = preprocess(userStmt);
+ *   userStmt = doSubstitutions(userStmt);
  */
 class ElizPres {
-  #pres = null;
+  #wordSubs = {};
 
-  #preExp = null;
+  #regEx = null;
 
-  init(pres) {
-    this.#pres = {};
-
-    if ((pres && pres.length)) {
-      const a = [];
-      for (let i = 0; i < pres.length; i += 2) {
-        a.push(pres[i]);
-        this.#pres[pres[i]] = pres[i + 1];
-      }
-      this.#preExp = new RegExp(`\\b(${a.join('|')})\\b`);
-    } else {
-      // default (should not match)
-      this.#preExp = /####/;
-      this.#pres['####'] = '####';
-    }
+  constructor(subsDict) {
+    this.#wordSubs = subsDict;
+    const values = Object.keys(subsDict);
+    this.#regEx = new RegExp(`\\b(${values.join('|')})\\b`);
   }
 
-  preprocess(part) {
-    // preprocess (v.1.1: work around lambda function)
-    let m = this.#preExp.exec(part);
-    if (m) {
-      let lp = '';
-      let rp = part;
-      while (m) {
-        lp += rp.substring(0, m.index) + this.#pres[m[1]];
-        rp = rp.substring(m.index + m[0].length);
-        m = this.#preExp.exec(rp);
-      }
-      // eslint-disable-next-line no-param-reassign
-      part = lp + rp;
+  doSubstitutions(phrase) {
+    if (!this.#regEx.test(phrase)) {
+      return phrase;
     }
-    return part;
+
+    let matches = this.#regEx.exec(phrase);
+    let result = '';
+    let remaining = phrase;
+    while (matches) {
+      result += remaining.substring(0, matches.index) + this.#wordSubs[matches[1]];
+      remaining = remaining.substring(matches.index + matches[0].length);
+      matches = this.#regEx.exec(remaining);
+    }
+
+    return result + remaining;
   }
 }
 
-module.exports = new ElizPres();
+module.exports = ElizPres;
