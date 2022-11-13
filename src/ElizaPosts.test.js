@@ -1,15 +1,15 @@
 /* eslint-disable key-spacing, no-multi-spaces */
-const TestPresubstitutions = [
-  'am',       'are',
-  'your',     'my',
-  'me',       'you',
-  'myself',   'yourself',
-  'yourself', 'myself',
-  "i'm",      'you are',
-  'i',        'you',
-  'you',      'I',
-  'my',       'your',
-];
+const TestPresubstitutions = {
+  am:       'are',
+  your:     'my',
+  me:       'you',
+  myself:   'yourself',
+  yourself: 'myself',
+  "i'm":    'you are',
+  i:        'you',
+  you:      'I',
+  my:       'your',
+};
 
 const ElizaPosts = require('./elizaPosts');
 

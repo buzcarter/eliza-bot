@@ -614,17 +614,17 @@ const pres = {
  * * `Hash`: words which are replaced after the transformations and after the reply is constructed;
  * * `Values`: the respective replacement words.
  */
-const post = [
-  'am',       'are',
-  'your',     'my',
-  'me',       'you',
-  'myself',   'yourself',
-  'yourself', 'myself',
-  "i'm",      'you are',
-  'i',        'you',
-  'you',      'I',
-  'my',       'your',
-];
+const post = {
+  am:       'are',
+  your:     'my',
+  me:       'you',
+  myself:   'yourself',
+  yourself: 'myself',
+  "i'm":      'you are',
+  i:        'you',
+  you:      'I',
+  my:       'your',
+};
 
 const synonyms = {
   be:       ['am', 'is', 'are', 'was'],
