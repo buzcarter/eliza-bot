@@ -1,6 +1,7 @@
-const langConfig = require('./languageConfig');
 const ElizaMemory = require('./elizaMemory');
+const ElizaPosts = require('./elizaPosts');
 const ElizPres = require('./elizaPres');
+const langConfig = require('./languageConfig');
 
 const pickRandom = (ary) => ((!ary) ? '' : ary[Math.floor(Math.random() * ary.length)]);
 
@@ -11,18 +12,17 @@ class ElizaBot {
   capitalizeFirstLetter = null;
   debug = null;
   elizaKeywords = null;
-  elizaPosts = null;
   elizaPostTransforms = null;
   elizaSynons = null;
   getFinal = null;
   lastchoice = null;
   noRandom = null;
-  postExp = null;
-  posts = null;
   quit = null;
   sentence = null;
   version = null;
   */
+
+  #elizaPosts = null;
 
   #elizaPres = null;
 
@@ -151,22 +151,8 @@ class ElizaBot {
     this.elizaKeywords.sort(this.#sortKeywords);
 
     // and compose regexps and refs for pres and posts
-    this.posts = {};
-
+    this.#elizaPosts = new ElizaPosts(langConfig.post);
     this.#elizaPres = new ElizPres(langConfig.pres);
-
-    if ((this.elizaPosts) && (this.elizaPosts.length)) {
-      const a = [];
-      for (let i = 0; i < this.elizaPosts.length; i += 2) {
-        a.push(this.elizaPosts[i]);
-        this.posts[this.elizaPosts[i]] = this.elizaPosts[i + 1];
-      }
-      this.postExp = new RegExp(`\\b(${a.join('|')})\\b`);
-    } else {
-      // default (should not match)
-      this.postExp = /####/;
-      this.posts['####'] = '####';
-    }
 
     // check for langConfig.quitCommands and install default if missing
     if (!Array.isArray(langConfig.quitCommands)) {
@@ -271,18 +257,7 @@ class ElizaBot {
           let rp = rpl;
           while (m1) {
             let param = m[parseInt(m1[1], 10)];
-            // postprocess param
-            let m2 = this.postExp.exec(param);
-            if (m2) {
-              let lp2 = '';
-              let rp2 = param;
-              while (m2) {
-                lp2 += rp2.substring(0, m2.index) + this.posts[m2[1]];
-                rp2 = rp2.substring(m2.index + m2[0].length);
-                m2 = this.postExp.exec(rp2);
-              }
-              param = lp2 + rp2;
-            }
+            param = this.#elizaPosts.doSubstitutions(param);
             lp += rp.substring(0, m1.index) + param;
             rp = rp.substring(m1.index + m1[0].length);
             m1 = paramre.exec(rp);
