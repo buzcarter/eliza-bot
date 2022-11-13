@@ -1,6 +1,5 @@
 const ElizaMemory = require('./elizaMemory');
-const ElizaPosts = require('./elizaPosts');
-const ElizPres = require('./elizaPres');
+const SimpleReplacements = require('./SimpleReplacements');
 const langConfig = require('./languageConfig');
 
 const pickRandom = (ary) => ((!ary) ? '' : ary[Math.floor(Math.random() * ary.length)]);
@@ -22,8 +21,17 @@ class ElizaBot {
   version = null;
   */
 
+  /**
+   * Applies simple substitution rules to the reassembly rule.
+   * This is where all the ``I'''s and ``you'''s are exchanged.
+   * @type SimpleReplacements
+   */
   #elizaPosts = null;
 
+  /**
+   * Applied to user-input text, BEFORE any processing, and before a reassebly statement has been selected.
+   * @type SimpleReplacements
+   */
   #elizaPres = null;
 
   /**
@@ -151,8 +159,8 @@ class ElizaBot {
     this.elizaKeywords.sort(this.#sortKeywords);
 
     // and compose regexps and refs for pres and posts
-    this.#elizaPosts = new ElizaPosts(langConfig.post);
-    this.#elizaPres = new ElizPres(langConfig.pres);
+    this.#elizaPosts = new SimpleReplacements(langConfig.post);
+    this.#elizaPres = new SimpleReplacements(langConfig.pres);
 
     // check for langConfig.quitCommands and install default if missing
     if (!Array.isArray(langConfig.quitCommands)) {
@@ -175,51 +183,61 @@ class ElizaBot {
   }
 
   transform(text) {
-    let rpl = '';
     this.quit = false;
 
-    /* eslint-disable no-param-reassign */
     // unify text string
-    text = text.toLowerCase();
-    text = text.replace(/@#\$%\^&\*\(\)_\+=~`\{\[\}\]\|:;<>\/\\\t/g, ' ');
-    text = text.replace(/\s+-+\s+/g, '.');
-    text = text.replace(/\s*[,.?!;]+\s*/g, '.');
-    text = text.replace(/\s*\bbut\b\s*/g, '.');
-    text = text.replace(/\s{2,}/g, ' ');
-    /* eslint-enable no-param-reassign */
+    // eslint-disable-next-line no-param-reassign
+    text = text
+      .toLowerCase()
+      .replace(/@#\$%\^&\*\(\)_\+=~`\{\[\}\]\|:;<>\/\\\t/g, ' ')
+      .replace(/\s+-+\s+/g, '.')
+      .replace(/\s*[,.?!;]+\s*/g, '.')
+      .replace(/\s*\bbut\b\s*/g, '.')
+      .replace(/\s{2,}/g, ' ');
 
     // split text in part sentences and loop through them
     const parts = text.split('.');
+    let reply = '';
     for (let i = 0; i < parts.length; i++) {
       let part = parts[i];
-      if (part !== '') {
-        // check for quit expression
-        if (langConfig.quitCommands.includes(part)) {
-          this.quit = true;
-          return this.getFinal();
-        }
+      if (part === '') {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
-        part = this.#elizaPres.doSubstitutions(part);
-        this.sentence = part;
-        // loop trough keywords
-        for (let k = 0; k < this.elizaKeywords.length; k++) {
-          if (part.search(new RegExp(`\\b${this.elizaKeywords[k][0]}\\b`, 'i')) >= 0) {
-            rpl = this.#execRule(k);
-          }
-          if (rpl !== '') return rpl;
+      // check for quit expression
+      if (langConfig.quitCommands.includes(part)) {
+        this.quit = true;
+        return this.getFinal();
+      }
+
+      part = this.#elizaPres.doSubstitutions(part);
+      this.sentence = part;
+      // loop trough keywords
+      for (let k = 0; k < this.elizaKeywords.length; k++) {
+        if (part.search(new RegExp(`\\b${this.elizaKeywords[k][0]}\\b`, 'i')) >= 0) {
+          reply = this.#execRule(k);
+        }
+        if (reply !== '') {
+          return reply;
         }
       }
     }
+
     // nothing matched try mem
-    rpl = this.elizeMem.get();
-    // if nothing in mem, so try xnone
-    if (rpl === '') {
+    reply = this.elizeMem.get();
+
+    // if nothing in mem so try xnone
+    if (reply === '') {
       this.sentence = ' ';
       const k = this.#getRuleIndexByKey('xnone');
-      if (k >= 0) rpl = this.#execRule(k);
+      if (k >= 0) {
+        reply = this.#execRule(k);
+      }
     }
+
     // return reply or default string
-    return (rpl !== '') ? rpl : 'I am at a loss for words.';
+    return reply || 'I am at a loss for words.';
   }
 
   #execRule(k) {

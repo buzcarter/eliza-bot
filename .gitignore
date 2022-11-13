@@ -1,9 +1,3 @@
 # **/*.gitignore
-
-# Our Gulp Build Files
+.DS_Store
 node_modules/
-
-# Files from difference tools
-**/*.bak
-
-# Operating system files

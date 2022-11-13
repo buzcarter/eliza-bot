@@ -1,5 +1,7 @@
 # Eliza Bot
 
+http://www.cs.cmu.edu/~msharifi/speechlab/Eliza.html
+
 (Copied from [elisabot-js](https://github.com/brandongmwong/elizabot-js))
 
 ## What is this?

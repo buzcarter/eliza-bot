@@ -626,6 +626,11 @@ const post = {
   my:       'your',
 };
 
+/**
+ * %synon
+ * * `Hash`: words which are found in decomposition rules;
+ * * `Values`: words which are treated just like their corresponding synonyms during matching of decomposition rules.
+ */
 const synonyms = {
   be:       ['am', 'is', 'are', 'was'],
   belief:   ['feel', 'think', 'believe', 'wish'],
