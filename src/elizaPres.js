@@ -1,5 +1,3 @@
-const langConfig = require('./languageConfig');
-
 /**
  * # preprocess()
  * `preprocess()` applies simple substitution rules to the input string.
@@ -14,40 +12,37 @@ const langConfig = require('./languageConfig');
  *   userStmt = preprocess(userStmt);
  */
 class ElizPres {
-  pres = null;
+  #pres = null;
 
-  preExp = null;
+  #preExp = null;
 
-  elizaPres = null;
+  init(pres) {
+    this.#pres = {};
 
-  init() {
-    this.elizaPres = langConfig.pres;
-    this.pres = {};
-
-    if ((this.elizaPres) && (this.elizaPres.length)) {
+    if ((pres && pres.length)) {
       const a = [];
-      for (let i = 0; i < this.elizaPres.length; i += 2) {
-        a.push(this.elizaPres[i]);
-        this.pres[this.elizaPres[i]] = this.elizaPres[i + 1];
+      for (let i = 0; i < pres.length; i += 2) {
+        a.push(pres[i]);
+        this.#pres[pres[i]] = pres[i + 1];
       }
-      this.preExp = new RegExp(`\\b(${a.join('|')})\\b`);
+      this.#preExp = new RegExp(`\\b(${a.join('|')})\\b`);
     } else {
       // default (should not match)
-      this.preExp = /####/;
-      this.pres['####'] = '####';
+      this.#preExp = /####/;
+      this.#pres['####'] = '####';
     }
   }
 
   preprocess(part) {
     // preprocess (v.1.1: work around lambda function)
-    let m = this.preExp.exec(part);
+    let m = this.#preExp.exec(part);
     if (m) {
       let lp = '';
       let rp = part;
       while (m) {
-        lp += rp.substring(0, m.index) + this.pres[m[1]];
+        lp += rp.substring(0, m.index) + this.#pres[m[1]];
         rp = rp.substring(m.index + m[0].length);
-        m = this.preExp.exec(rp);
+        m = this.#preExp.exec(rp);
       }
       // eslint-disable-next-line no-param-reassign
       part = lp + rp;
