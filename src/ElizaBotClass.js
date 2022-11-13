@@ -1,5 +1,6 @@
 const langConfig = require('./languageConfig');
 const ElizaMemory = require('./elizaMemory');
+const elizaPres = require('./elizaPres');
 
 const pickRandom = (ary) => ((!ary) ? '' : ary[Math.floor(Math.random() * ary.length)]);
 
@@ -12,15 +13,12 @@ class ElizaBot {
   elizaKeywords = null;
   elizaPosts = null;
   elizaPostTransforms = null;
-  elizaPres = null;
   elizaSynons = null;
   getFinal = null;
   lastchoice = null;
   noRandom = null;
   postExp = null;
   posts = null;
-  preExp = null;
-  pres = null;
   quit = null;
   sentence = null;
   version = null;
@@ -34,7 +32,6 @@ class ElizaBot {
   constructor(opts) {
     this.elizaKeywords = langConfig.keywords;
     this.elizaPostTransforms = langConfig.postTransforms;
-    this.elizaPres = langConfig.pres;
     this.elizaPosts = langConfig.post;
     this.elizaSynons = langConfig.synonyms;
 
@@ -152,21 +149,9 @@ class ElizaBot {
     this.elizaKeywords.sort(this.#sortKeywords);
 
     // and compose regexps and refs for pres and posts
-    this.pres = {};
     this.posts = {};
 
-    if ((this.elizaPres) && (this.elizaPres.length)) {
-      const a = [];
-      for (let i = 0; i < this.elizaPres.length; i += 2) {
-        a.push(this.elizaPres[i]);
-        this.pres[this.elizaPres[i]] = this.elizaPres[i + 1];
-      }
-      this.preExp = new RegExp(`\\b(${a.join('|')})\\b`);
-    } else {
-      // default (should not match)
-      this.preExp = /####/;
-      this.pres['####'] = '####';
-    }
+    elizaPres.init(langConfig.pres);
 
     if ((this.elizaPosts) && (this.elizaPosts.length)) {
       const a = [];
@@ -226,18 +211,7 @@ class ElizaBot {
           return this.getFinal();
         }
 
-        // preprocess (v.1.1: work around lambda function)
-        let m = this.preExp.exec(part);
-        if (m) {
-          let lp = '';
-          let rp = part;
-          while (m) {
-            lp += rp.substring(0, m.index) + this.pres[m[1]];
-            rp = rp.substring(m.index + m[0].length);
-            m = this.preExp.exec(rp);
-          }
-          part = lp + rp;
-        }
+        part = elizaPres.preprocess(part);
         this.sentence = part;
         // loop trough keywords
         for (let k = 0; k < this.elizaKeywords.length; k++) {

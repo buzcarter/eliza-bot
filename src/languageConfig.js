@@ -583,6 +583,11 @@ const quitCommands = [
   'quit',
 ];
 
+/**
+ * %pre
+ * * `Hash`: words which are replaced before any transformations;
+ * * `Values`: the respective replacement words.
+ */
 const pres = [
   'dont',         "don't",
   'cant',         "can't",
