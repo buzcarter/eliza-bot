@@ -81,6 +81,7 @@ class ElizaBot {
       // eslint-disable-next-line guard-for-in, no-restricted-syntax
       for (const i in this.elizaSynons) synPatterns[i] = `(${i}|${this.elizaSynons[i].join('|')})`;
     }
+
     // check for keywords or install empty structure to prevent any errors
     if ((!this.elizaKeywords) || (typeof this.elizaKeywords.length === 'undefined')) {
       this.elizaKeywords = [
@@ -89,72 +90,94 @@ class ElizaBot {
         ]],
       ];
     }
+
     // 1st convert rules to regexps
+
+    const regExes = {
+      /** finds "`@happy`" within "`* i am* @happy *`" */
+      AT_VAR_NAMES: /@(\S+)/,
+      /** Inline "*", finds "`u *r`" within "`* do you *remember *`" */
+      INLINE_WILDCARD: /(\S)\s*\*\s*(\S)/,
+      /** Starts with a wildcard, finds "`* a`" within "`* are you *`" */
+      STARTS_WITH_WILDCARD: /^\s*\*\s*(\S)/,
+      /** Ends with a wildcard, finds "`u *`" within "`* are you *`" */
+      ENDS_WITH_WILDCARD: /(\S)\s*\*\s*$/,
+      /** looks for "`*`" even if it's surrounded by spaces "`   *   `" */
+      WILDCARD: /^\s*\*\s*$/,
+      /** One or more spaces (anywhere) */
+      WHITESPACE: /\s+/g,
+    };
+
     // expand synonyms and insert asterisk expressions for backtracking
-    const sre = /@(\S+)/;
-    const are = /(\S)\s*\*\s*(\S)/;
-    const are1 = /^\s*\*\s*(\S)/;
-    const are2 = /(\S)\s*\*\s*$/;
-    const are3 = /^\s*\*\s*$/;
-    const wsre = /\s+/g;
     for (let k = 0; k < this.elizaKeywords.length; k++) {
-      const rules = this.elizaKeywords[k][2];
+      const rulesList = this.elizaKeywords[k][2];
       this.elizaKeywords[k][3] = k; // save original index for sorting
-      for (let i = 0; i < rules.length; i++) {
-        const r = rules[i];
+      for (let i = 0; i < rulesList.length; i++) {
+        const rule = rulesList[i];
+        let rulePattern = rule[0];
+
         // check mem flag and store it as decomp's element 2
-        if (r[0].charAt(0) === '$') {
-          let ofs = 1;
-          while (r[0].charAt[ofs] === ' ') ofs++;
-          r[0] = r[0].substring(ofs);
-          r[2] = true;
+        if (rulePattern.charAt(0) === '$') {
+          let offset = 1;
+          while (rulePattern.charAt[offset] === ' ') offset++;
+          rulePattern = rulePattern.substring(offset);
+          rule[2] = true;
         } else {
-          r[2] = false;
+          rule[2] = false;
         }
-        // expand synonyms (v.1.1: work around lambda function)
-        let m = sre.exec(r[0]);
-        while (m) {
-          const sp = (synPatterns[m[1]]) ? synPatterns[m[1]] : m[1];
-          r[0] = r[0].substring(0, m.index) + sp + r[0].substring(m.index + m[0].length);
-          m = sre.exec(r[0]);
+
+        // expand synonyms
+        let atVarsMatches = regExes.AT_VAR_NAMES.exec(rulePattern);
+        while (atVarsMatches) {
+          const synonTxt = synPatterns[atVarsMatches[1]] ? synPatterns[atVarsMatches[1]] : atVarsMatches[1];
+          rulePattern = rulePattern.substring(0, atVarsMatches.index) + synonTxt + rulePattern.substring(atVarsMatches.index + atVarsMatches[0].length);
+          atVarsMatches = regExes.AT_VAR_NAMES.exec(rulePattern);
         }
-        // expand asterisk expressions (v.1.1: work around lambda function)
-        if (are3.test(r[0])) {
-          r[0] = '\\s*(.*)\\s*';
+
+        // expand asterisk expressions
+        if (regExes.WILDCARD.test(rulePattern)) {
+          rulePattern = '\\s*(.*)\\s*';
         } else {
-          m = are.exec(r[0]);
-          if (m) {
-            let lp = '';
-            let rp = r[0];
-            while (m) {
-              lp += rp.substring(0, m.index + 1);
-              if (m[1] !== ')') lp += '\\b';
-              lp += '\\s*(.*)\\s*';
-              if ((m[2] !== '(') && (m[2] !== '\\')) lp += '\\b';
-              lp += m[2];
-              rp = rp.substring(m.index + m[0].length);
-              m = are.exec(rp);
+          let inlineMatches = regExes.INLINE_WILDCARD.exec(rulePattern);
+          if (inlineMatches) {
+            let leftPart = '';
+            let rightPart = rulePattern;
+            while (inlineMatches) {
+              leftPart += rightPart.substring(0, inlineMatches.index + 1);
+              if (inlineMatches[1] !== ')') leftPart += '\\b';
+              leftPart += '\\s*(.*)\\s*';
+              if ((inlineMatches[2] !== '(') && (inlineMatches[2] !== '\\')) leftPart += '\\b';
+              leftPart += inlineMatches[2];
+              rightPart = rightPart.substring(inlineMatches.index + inlineMatches[0].length);
+              inlineMatches = regExes.INLINE_WILDCARD.exec(rightPart);
             }
-            r[0] = lp + rp;
+            rulePattern = leftPart + rightPart;
           }
-          m = are1.exec(r[0]);
-          if (m) {
-            let lp = '\\s*(.*)\\s*';
-            if ((m[1] !== ')') && (m[1] !== '\\')) lp += '\\b';
-            r[0] = lp + r[0].substring(m.index - 1 + m[0].length);
+
+          const startsMatches = regExes.STARTS_WITH_WILDCARD.exec(rulePattern);
+          if (startsMatches) {
+            let patternTxt = '\\s*(.*)\\s*';
+            if ((startsMatches[1] !== ')') && (startsMatches[1] !== '\\')) patternTxt += '\\b';
+            rulePattern = patternTxt + rulePattern.substring(startsMatches.index - 1 + startsMatches[0].length);
           }
-          m = are2.exec(r[0]);
-          if (m) {
-            let lp = r[0].substring(0, m.index + 1);
-            if (m[1] !== '(') lp += '\\b';
-            r[0] = `${lp}\\s*(.*)\\s*`;
+
+          const endsMatches = regExes.ENDS_WITH_WILDCARD.exec(rulePattern);
+          if (endsMatches) {
+            let patternTxt = rulePattern.substring(0, endsMatches.index + 1);
+            if (endsMatches[1] !== '(') patternTxt += '\\b';
+            rulePattern = `${patternTxt}\\s*(.*)\\s*`;
           }
         }
+
         // expand white space
-        r[0] = r[0].replace(wsre, '\\s+');
-        wsre.lastIndex = 0;
+        rulePattern = rulePattern.replace(regExes.WHITESPACE, '\\s+');
+
+        rule[0] = rulePattern;
+
+        regExes.WHITESPACE.lastIndex = 0;
       }
     }
+
     // now sort keywords by rank (highest first)
     this.elizaKeywords.sort(this.#sortKeywords);
 
@@ -268,7 +291,7 @@ class ElizaBot {
           const ki = this.#getRuleIndexByKey(rpl.substring(5));
           if (ki >= 0) return this.#execRule(ki);
         }
-        // substitute positional params (v.1.1: work around lambda function)
+        // substitute positional params
         let m1 = paramre.exec(rpl);
         if (m1) {
           let lp = '';
@@ -301,7 +324,7 @@ class ElizaBot {
         this.elizaPostTransforms[i].lastIndex = 0;
       }
     }
-    // capitalize first char (v.1.1: work around lambda function)
+    // capitalize first char
     if (this.capitalizeFirstLetter) {
       const re = /^([a-z])/;
       const m = re.exec(s);
