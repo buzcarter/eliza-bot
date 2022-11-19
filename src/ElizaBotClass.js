@@ -5,21 +5,38 @@ const langConfig = require('./languageConfig');
 const pickRandom = (ary) => ((!ary) ? '' : ary[Math.floor(Math.random() * ary.length)]);
 
 class ElizaBot {
-  #dataParsed = null;
-
   /*
-  capitalizeFirstLetter = null;
-  debug = null;
-  elizaKeywords = null;
-  elizaPostTransforms = null;
-  elizaSynons = null;
-  getFinal = null;
-  lastchoice = null;
-  noRandom = null;
-  quit = null;
-  sentence = null;
   version = null;
+
+  // #region options
+  capitalizeFirstLetter = false;
+
+  debug = false;
+
+  elizeMem = false;
+
+  noRandom = false;
+
+  quit = false;
+  // #endregion
+
+  elizaKeywords = null;
+
+  elizaPosts = null;
+
+  elizaPostTransforms = null;
+
+  elizaSynons = null;
+
+  getFinal = null;
+
+  lastchoice = [];
+
+  sentence = null;
+
   */
+
+  #dataParsed = false;
 
   /**
    * Applies simple substitution rules to the reassembly rule.
@@ -73,28 +90,31 @@ class ElizaBot {
   }
 
   #init() {
-    // parse data and convert it from canonical form to internal use
-    // prodoce synonym list
-    const synPatterns = {};
+    this.#expandKeywords();
 
-    if ((this.elizaSynons) && (typeof this.elizaSynons === 'object')) {
-      // eslint-disable-next-line guard-for-in, no-restricted-syntax
-      for (const i in this.elizaSynons) synPatterns[i] = `(${i}|${this.elizaSynons[i].join('|')})`;
+    // and compose regexps and refs for pres and posts
+    this.#elizaPosts = new SimpleReplacements(langConfig.post);
+    this.#elizaPres = new SimpleReplacements(langConfig.pres);
+
+    // check for langConfig.quitCommands and install default if missing
+    if (!Array.isArray(langConfig.quitCommands)) {
+      langConfig.quitCommands = [];
     }
 
-    // check for keywords or install empty structure to prevent any errors
-    if (!Array.isArray(this.elizaKeywords) || !this.elizaKeywords.length) {
-      this.elizaKeywords = [{
-        keyword: '###',
-        originalIndex: 0,
-        weight: 0,
-        phrases: [{
-          pattern: '###',
-          regEx: null,
-          useMemFlag: false,
-          responses: [],
-        }],
-      }];
+    // done
+    this.#dataParsed = true;
+  }
+
+  /** parse data and convert it from canonical form to internal use */
+  #expandKeywords() {
+    // generate synonym list
+    const synPatterns = {};
+
+    if (this.elizaSynons && typeof this.elizaSynons === 'object') {
+      // eslint-disable-next-line guard-for-in, no-restricted-syntax
+      for (const i in this.elizaSynons) {
+        synPatterns[i] = `(${i}|${this.elizaSynons[i].join('|')})`;
+      }
     }
 
     // 1st convert rules to regexps
@@ -113,6 +133,21 @@ class ElizaBot {
       /** One or more spaces (anywhere) */
       WHITESPACE: /\s+/g,
     };
+
+    // check for keywords or install empty structure to prevent any errors
+    if (!Array.isArray(this.elizaKeywords) || !this.elizaKeywords.length) {
+      this.elizaKeywords = [{
+        keyword: '###',
+        originalIndex: 0,
+        weight: 0,
+        phrases: [{
+          pattern: '###',
+          regEx: null,
+          useMemFlag: false,
+          responses: [],
+        }],
+      }];
+    }
 
     // expand synonyms and insert asterisk expressions for backtracking
     this.elizaKeywords.forEach((keywordEntry, k) => {
@@ -188,18 +223,6 @@ class ElizaBot {
 
     // now sort keywords by weight (highest first)
     this.elizaKeywords.sort(ElizaBot.#sortKeywords);
-
-    // and compose regexps and refs for pres and posts
-    this.#elizaPosts = new SimpleReplacements(langConfig.post);
-    this.#elizaPres = new SimpleReplacements(langConfig.pres);
-
-    // check for langConfig.quitCommands and install default if missing
-    if (!Array.isArray(langConfig.quitCommands)) {
-      langConfig.quitCommands = [];
-    }
-
-    // done
-    this.#dataParsed = true;
   }
 
   static #sortKeywords(a, b) {
