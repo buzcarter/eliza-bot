@@ -11,14 +11,14 @@ let bot = null;
 const getBot = () => (bot || (bot = new ElizaBot(options)));
 
 module.exports = {
-  reply(patientInput) {
-    return getBot().transform(patientInput);
+  reply(inputText) {
+    return getBot().getReply(inputText);
   },
   start() {
-    return getBot().getInitial();
+    return getBot().getGreeting();
   },
   bye() {
-    return getBot().getFinal();
+    return getBot().getFarewell();
   },
   hasQuit() {
     return getBot().quit;

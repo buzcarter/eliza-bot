@@ -4,37 +4,42 @@ const langConfig = require('./languageConfig');
 
 const pickRandom = (ary) => ((!ary) ? '' : ary[Math.floor(Math.random() * ary.length)]);
 
+/** capitalize first char */
+function capitalizeFirstLetter(text) {
+  const re = /^([a-z])/;
+  const m = re.exec(text);
+  return m
+    ? m[0].toUpperCase() + text.substring(1)
+    : text;
+}
+
 class ElizaBot {
-  /*
   version = null;
 
   // #region options
-  capitalizeFirstLetter = false;
+  #capitalizeFirstLetterEnabled = false;
 
-  debug = false;
+  #debugEnabled = false;
 
-  elizeMem = false;
-
-  noRandom = false;
-
-  quit = false;
+  #noRandomResponsesEnabled = false;
   // #endregion
 
-  elizaKeywords = null;
+  quit = false;
 
-  elizaPosts = null;
+  keywordsList = null;
 
-  elizaPostTransforms = null;
+  postsHash = null;
 
-  elizaSynons = null;
+  postTransformsList = null;
 
-  getFinal = null;
+  synonymsHash = null;
 
+  /** 2-Dimensional array of last {responseIndex} `[{keywordIndex}][{phraseIndex}]` */
   lastchoice = [];
 
-  sentence = null;
+  sentence = '';
 
-  */
+  #elizaMemory = false;
 
   #dataParsed = false;
 
@@ -57,18 +62,19 @@ class ElizaBot {
    * @param {boolean} opts.noRandom
    */
   constructor(opts) {
-    this.elizaKeywords = langConfig.keywords;
-    this.elizaPostTransforms = langConfig.postTransforms;
-    this.elizaPosts = langConfig.post;
-    this.elizaSynons = langConfig.synonyms;
+    this.keywordsList = langConfig.keywords;
+    this.postTransformsList = langConfig.postTransforms;
+    this.postsHash = langConfig.post;
+    this.synonymsHash = langConfig.synonyms;
 
     const { debugEnabled, noRandom } = opts || {};
-    this.noRandom = Boolean(noRandom);
-    this.capitalizeFirstLetter = true;
-    this.debug = Boolean(debugEnabled);
+    this.#noRandomResponsesEnabled = Boolean(noRandom);
+    this.#capitalizeFirstLetterEnabled = true;
+    this.#debugEnabled = Boolean(debugEnabled);
+
     this.version = '1.1 (original)';
 
-    this.elizeMem = new ElizaMemory(opts);
+    this.#elizaMemory = new ElizaMemory(opts);
     this.#dataParsed = false;
     if (!this.#dataParsed) {
       this.#init();
@@ -79,13 +85,15 @@ class ElizaBot {
 
   reset() {
     this.quit = false;
-    this.elizeMem.reset();
+    this.#elizaMemory.reset();
     this.lastchoice = [];
 
-    for (let k = 0; k < this.elizaKeywords.length; k++) {
-      this.lastchoice[k] = [];
-      const { phrases } = this.elizaKeywords[k];
-      for (let i = 0; i < phrases.length; i++) this.lastchoice[k][i] = -1;
+    for (let keywordIndex = 0; keywordIndex < this.keywordsList.length; keywordIndex++) {
+      this.lastchoice[keywordIndex] = [];
+      const { phrases } = this.keywordsList[keywordIndex];
+      for (let phraseIndex = 0; phraseIndex < phrases.length; phraseIndex++) {
+        this.lastchoice[keywordIndex][phraseIndex] = -1;
+      }
     }
   }
 
@@ -110,10 +118,10 @@ class ElizaBot {
     // generate synonym list
     const synPatterns = {};
 
-    if (this.elizaSynons && typeof this.elizaSynons === 'object') {
+    if (this.synonymsHash && typeof this.synonymsHash === 'object') {
       // eslint-disable-next-line guard-for-in, no-restricted-syntax
-      for (const i in this.elizaSynons) {
-        synPatterns[i] = `(${i}|${this.elizaSynons[i].join('|')})`;
+      for (const i in this.synonymsHash) {
+        synPatterns[i] = `(${i}|${this.synonymsHash[i].join('|')})`;
       }
     }
 
@@ -135,8 +143,8 @@ class ElizaBot {
     };
 
     // check for keywords or install empty structure to prevent any errors
-    if (!Array.isArray(this.elizaKeywords) || !this.elizaKeywords.length) {
-      this.elizaKeywords = [{
+    if (!Array.isArray(this.keywordsList) || !this.keywordsList.length) {
+      this.keywordsList = [{
         keyword: '###',
         originalIndex: 0,
         weight: 0,
@@ -150,7 +158,7 @@ class ElizaBot {
     }
 
     // expand synonyms and insert asterisk expressions for backtracking
-    this.elizaKeywords.forEach((keywordEntry, k) => {
+    this.keywordsList.forEach((keywordEntry, k) => {
       // eslint-disable-next-line no-param-reassign
       keywordEntry.originalIndex = k; // save original index for sorting
       keywordEntry.phrases.forEach((thisPhrase) => {
@@ -222,7 +230,7 @@ class ElizaBot {
     });
 
     // now sort keywords by weight (highest first)
-    this.elizaKeywords.sort(ElizaBot.#sortKeywords);
+    this.keywordsList.sort(ElizaBot.#sortKeywords);
   }
 
   static #sortKeywords(a, b) {
@@ -235,12 +243,12 @@ class ElizaBot {
     return 0;
   }
 
-  transform(text) {
+  getReply(inputText) {
     this.quit = false;
 
     // unify text string
     // eslint-disable-next-line no-param-reassign
-    text = text
+    inputText = inputText
       .toLowerCase()
       .replace(/@#\$%\^&\*\(\)_\+=~`\{\[\}\]\|:;<>\/\\\t/g, ' ')
       .replace(/\s+-+\s+/g, '.')
@@ -249,7 +257,7 @@ class ElizaBot {
       .replace(/\s{2,}/g, ' ');
 
     // split text in part sentences and loop through them
-    const parts = text.split('.');
+    const parts = inputText.split('.');
     let reply = '';
     for (let i = 0; i < parts.length; i++) {
       let part = parts[i];
@@ -261,14 +269,14 @@ class ElizaBot {
       // check for quit expression
       if (langConfig.quitCommands.includes(part)) {
         this.quit = true;
-        return this.getFinal();
+        return this.getFarewell();
       }
 
       part = this.#elizaPres.doSubstitutions(part);
       this.sentence = part;
       // loop trough keywords
-      for (let k = 0; k < this.elizaKeywords.length; k++) {
-        const { keyword } = this.elizaKeywords[k];
+      for (let k = 0; k < this.keywordsList.length; k++) {
+        const { keyword } = this.keywordsList[k];
         if (part.search(new RegExp(`\\b${keyword}\\b`, 'i')) >= 0) {
           reply = this.#execRule(k);
         }
@@ -279,7 +287,7 @@ class ElizaBot {
     }
 
     // nothing matched try mem
-    reply = this.elizeMem.get();
+    reply = this.#elizaMemory.get();
 
     // if nothing in mem so try xnone
     if (reply === '') {
@@ -294,32 +302,38 @@ class ElizaBot {
     return reply || 'I am at a loss for words.';
   }
 
+  #getNextResponse(keywordIndex, phraseIndex, responses) {
+    let index = this.#noRandomResponsesEnabled ? 0 : Math.floor(Math.random() * responses.length);
+    const lastIndex = this.lastchoice[keywordIndex][phraseIndex];
+
+    if ((this.#noRandomResponsesEnabled && lastIndex > index) || (lastIndex === index)) {
+      index = lastIndex + 1;
+      if (index >= responses.length) {
+        index = 0;
+        this.lastchoice[keywordIndex][phraseIndex] = -1;
+      }
+    } else {
+      this.lastchoice[keywordIndex][phraseIndex] = index;
+    }
+
+    return responses[index];
+  }
+
   /**
    * @param {int} keywordIndex
    * @returns {string} statement
    */
   #execRule(keywordIndex) {
     const paramRegEx = /\(([0-9]+)\)/;
-    const { keyword, phrases, weight } = this.elizaKeywords[keywordIndex];
-    for (let i = 0; i < phrases.length; i++) {
-      const thisPhrase = phrases[i];
+    const { keyword, phrases, weight } = this.keywordsList[keywordIndex];
+    for (let phraseIndex = 0; phraseIndex < phrases.length; phraseIndex++) {
+      const thisPhrase = phrases[phraseIndex];
       const m = this.sentence.match(thisPhrase.regEx);
       if (m !== null) {
         const { responses, useMemFlag } = thisPhrase;
 
-        let responseIndex = this.noRandom ? 0 : Math.floor(Math.random() * responses.length);
-        if ((this.noRandom && (this.lastchoice[keywordIndex][i] > responseIndex)) || (this.lastchoice[keywordIndex][i] === responseIndex)) {
-          responseIndex = ++this.lastchoice[keywordIndex][i];
-          if (responseIndex >= responses.length) {
-            responseIndex = 0;
-            this.lastchoice[keywordIndex][i] = -1;
-          }
-        } else {
-          this.lastchoice[keywordIndex][i] = responseIndex;
-        }
-
-        let reply = responses[responseIndex];
-        if (this.debug) {
+        let reply = this.#getNextResponse(keywordIndex, phraseIndex, responses);
+        if (this.#debugEnabled) {
           // eslint-disable-next-line no-console
           console.log(`execRule match:\n  key: ${keyword}\n  weight: ${weight}\n  pattern: ${thisPhrase.pattern}\n  regEx: ${thisPhrase.regEx}\n  reasmb: ${reply}\n  useMemFlag: ${useMemFlag}`);
         }
@@ -348,7 +362,7 @@ class ElizaBot {
 
         reply = this.#postTransform(reply);
         if (useMemFlag) {
-          this.elizeMem.save(reply);
+          this.#elizaMemory.save(reply);
         } else {
           return reply;
         }
@@ -358,29 +372,25 @@ class ElizaBot {
   }
 
   /* eslint-disable no-param-reassign */
-  #postTransform(s) {
+  #postTransform(text) {
     // final cleanings
-    s = s.replace(/\s{2,}/g, ' ');
-    s = s.replace(/\s+\./g, '.');
-    if ((this.elizaPostTransforms) && (this.elizaPostTransforms.length)) {
-      for (let i = 0; i < this.elizaPostTransforms.length; i += 2) {
-        s = s.replace(this.elizaPostTransforms[i], this.elizaPostTransforms[i + 1]);
-        this.elizaPostTransforms[i].lastIndex = 0;
-      }
+    text = text
+      .replace(/\s{2,}/g, ' ')
+      .replace(/\s+\./g, '.');
+
+    if (Array.isArray(this.postTransformsList)) {
+      this.postTransformsList.forEach(({ pattern, replacement }) => {
+        text = text.replace(pattern, replacement);
+      });
     }
-    // capitalize first char
-    if (this.capitalizeFirstLetter) {
-      const re = /^([a-z])/;
-      const m = re.exec(s);
-      if (m) s = m[0].toUpperCase() + s.substring(1);
-    }
-    return s;
+
+    return this.#capitalizeFirstLetterEnabled ? capitalizeFirstLetter(text) : text;
   }
   /* eslint-enable no-param-reassign */
 
   #getRuleIndexByKey(key) {
-    for (let k = 0; k < this.elizaKeywords.length; k++) {
-      const { keyword } = this.elizaKeywords[k];
+    for (let k = 0; k < this.keywordsList.length; k++) {
+      const { keyword } = this.keywordsList[k];
       if (keyword === key) {
         return k;
       }
@@ -389,12 +399,12 @@ class ElizaBot {
   }
 
   // eslint-disable-next-line class-methods-use-this
-  getFinal() {
+  getFarewell() {
     return pickRandom(langConfig.farewells);
   }
 
   // eslint-disable-next-line class-methods-use-this
-  getInitial() {
+  getGreeting() {
     return pickRandom(langConfig.greetings);
   }
 }

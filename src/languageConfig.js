@@ -948,13 +948,13 @@ const keywords = [{
 }];
 
 const postTransforms = [
-  / old old/g,                 ' old',
-  /\bthey were( not)? me\b/g,  'it was$1 me',
-  /\bthey are( not)? me\b/g,   'it is$1 me',
-  /Are they( always)? me\b/,   'it is$1 me',
-  /\bthat your( own)? (\w+)( now)? \?/, 'that you have your$1 $2 ?',
-  /\bI to have (\w+)/,         'I have $1',
-  /Earlier you said your( own)? (\w+)( now)?\./, 'Earlier you talked about your $2.',
+  { pattern: / old old/g,                                   replacement: ' old' },
+  { pattern: /\bthey were( not)? me\b/g,                    replacement: 'it was$1 me' },
+  { pattern: /\bthey are( not)? me\b/g,                     replacement: 'it is$1 me' },
+  { pattern: /Are they( always)? me\b/,                     replacement: 'it is$1 me' },
+  { pattern: /\bthat your( own)? (\w+)( now)? \?/,          replacement: 'that you have your$1 $2 ?' },
+  { pattern: /\bI to have (\w+)/,                           replacement: 'I have $1' },
+  { pattern: /Earlier you said your( own)? (\w+)( now)?\./, replacement: 'Earlier you talked about your $2.' },
 ];
 
 const farewells = [
