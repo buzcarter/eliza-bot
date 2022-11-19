@@ -67,8 +67,8 @@ class ElizaBot {
 
     for (let k = 0; k < this.elizaKeywords.length; k++) {
       this.lastchoice[k] = [];
-      const rules = this.elizaKeywords[k][2];
-      for (let i = 0; i < rules.length; i++) this.lastchoice[k][i] = -1;
+      const { phrases } = this.elizaKeywords[k];
+      for (let i = 0; i < phrases.length; i++) this.lastchoice[k][i] = -1;
     }
   }
 
@@ -83,12 +83,18 @@ class ElizaBot {
     }
 
     // check for keywords or install empty structure to prevent any errors
-    if ((!this.elizaKeywords) || (typeof this.elizaKeywords.length === 'undefined')) {
-      this.elizaKeywords = [
-        ['###', 0, [
-          ['###', []],
-        ]],
-      ];
+    if (!Array.isArray(this.elizaKeywords) || !this.elizaKeywords.length) {
+      this.elizaKeywords = [{
+        keyword: '###',
+        originalIndex: 0,
+        weight: 0,
+        phrases: [{
+          pattern: '###',
+          regEx: null,
+          useMemFlag: false,
+          responses: [],
+        }],
+      }];
     }
 
     // 1st convert rules to regexps
@@ -109,39 +115,40 @@ class ElizaBot {
     };
 
     // expand synonyms and insert asterisk expressions for backtracking
-    for (let k = 0; k < this.elizaKeywords.length; k++) {
-      const rulesList = this.elizaKeywords[k][2];
-      this.elizaKeywords[k][3] = k; // save original index for sorting
-      for (let i = 0; i < rulesList.length; i++) {
-        const rule = rulesList[i];
-        let rulePattern = rule[0];
+    this.elizaKeywords.forEach((keywordEntry, k) => {
+      // eslint-disable-next-line no-param-reassign
+      keywordEntry.originalIndex = k; // save original index for sorting
+      keywordEntry.phrases.forEach((thisPhrase) => {
+        let newRegExStr = thisPhrase.pattern;
 
         // check mem flag and store it as decomp's element 2
-        if (rulePattern.charAt(0) === '$') {
+        if (newRegExStr.charAt(0) === '$') {
           let offset = 1;
-          while (rulePattern.charAt[offset] === ' ') offset++;
-          rulePattern = rulePattern.substring(offset);
-          rule[2] = true;
+          while (newRegExStr.charAt[offset] === ' ') offset++;
+          newRegExStr = newRegExStr.substring(offset);
+          // eslint-disable-next-line no-param-reassign
+          thisPhrase.useMemFlag = true;
         } else {
-          rule[2] = false;
+          // eslint-disable-next-line no-param-reassign
+          thisPhrase.useMemFlag = false;
         }
 
         // expand synonyms
-        let atVarsMatches = regExes.AT_VAR_NAMES.exec(rulePattern);
+        let atVarsMatches = regExes.AT_VAR_NAMES.exec(newRegExStr);
         while (atVarsMatches) {
           const synonTxt = synPatterns[atVarsMatches[1]] ? synPatterns[atVarsMatches[1]] : atVarsMatches[1];
-          rulePattern = rulePattern.substring(0, atVarsMatches.index) + synonTxt + rulePattern.substring(atVarsMatches.index + atVarsMatches[0].length);
-          atVarsMatches = regExes.AT_VAR_NAMES.exec(rulePattern);
+          newRegExStr = newRegExStr.substring(0, atVarsMatches.index) + synonTxt + newRegExStr.substring(atVarsMatches.index + atVarsMatches[0].length);
+          atVarsMatches = regExes.AT_VAR_NAMES.exec(newRegExStr);
         }
 
         // expand asterisk expressions
-        if (regExes.WILDCARD.test(rulePattern)) {
-          rulePattern = '\\s*(.*)\\s*';
+        if (regExes.WILDCARD.test(newRegExStr)) {
+          newRegExStr = '\\s*(.*)\\s*';
         } else {
-          let inlineMatches = regExes.INLINE_WILDCARD.exec(rulePattern);
+          let inlineMatches = regExes.INLINE_WILDCARD.exec(newRegExStr);
           if (inlineMatches) {
             let leftPart = '';
-            let rightPart = rulePattern;
+            let rightPart = newRegExStr;
             while (inlineMatches) {
               leftPart += rightPart.substring(0, inlineMatches.index + 1);
               if (inlineMatches[1] !== ')') leftPart += '\\b';
@@ -151,35 +158,36 @@ class ElizaBot {
               rightPart = rightPart.substring(inlineMatches.index + inlineMatches[0].length);
               inlineMatches = regExes.INLINE_WILDCARD.exec(rightPart);
             }
-            rulePattern = leftPart + rightPart;
+            newRegExStr = leftPart + rightPart;
           }
 
-          const startsMatches = regExes.STARTS_WITH_WILDCARD.exec(rulePattern);
+          const startsMatches = regExes.STARTS_WITH_WILDCARD.exec(newRegExStr);
           if (startsMatches) {
             let patternTxt = '\\s*(.*)\\s*';
             if ((startsMatches[1] !== ')') && (startsMatches[1] !== '\\')) patternTxt += '\\b';
-            rulePattern = patternTxt + rulePattern.substring(startsMatches.index - 1 + startsMatches[0].length);
+            newRegExStr = patternTxt + newRegExStr.substring(startsMatches.index - 1 + startsMatches[0].length);
           }
 
-          const endsMatches = regExes.ENDS_WITH_WILDCARD.exec(rulePattern);
+          const endsMatches = regExes.ENDS_WITH_WILDCARD.exec(newRegExStr);
           if (endsMatches) {
-            let patternTxt = rulePattern.substring(0, endsMatches.index + 1);
+            let patternTxt = newRegExStr.substring(0, endsMatches.index + 1);
             if (endsMatches[1] !== '(') patternTxt += '\\b';
-            rulePattern = `${patternTxt}\\s*(.*)\\s*`;
+            newRegExStr = `${patternTxt}\\s*(.*)\\s*`;
           }
         }
 
         // expand white space
-        rulePattern = rulePattern.replace(regExes.WHITESPACE, '\\s+');
+        newRegExStr = newRegExStr.replace(regExes.WHITESPACE, '\\s+');
 
-        rule[0] = rulePattern;
+        // eslint-disable-next-line no-param-reassign
+        thisPhrase.regEx = newRegExStr;
 
         regExes.WHITESPACE.lastIndex = 0;
-      }
-    }
+      });
+    });
 
-    // now sort keywords by rank (highest first)
-    this.elizaKeywords.sort(this.#sortKeywords);
+    // now sort keywords by weight (highest first)
+    this.elizaKeywords.sort(ElizaBot.#sortKeywords);
 
     // and compose regexps and refs for pres and posts
     this.#elizaPosts = new SimpleReplacements(langConfig.post);
@@ -194,14 +202,13 @@ class ElizaBot {
     this.#dataParsed = true;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  #sortKeywords(a, b) {
-    // sort by rank
-    if (a[1] > b[1]) return -1;
-    if (a[1] < b[1]) return 1;
-    // or original index
-    if (a[3] > b[3]) return 1;
-    if (a[3] < b[3]) return -1;
+  static #sortKeywords(a, b) {
+    if (a.weight > b.weight) return -1;
+    if (a.weight < b.weight) return 1;
+
+    if (a.originalIndex > b.originalIndex) return 1;
+    if (a.originalIndex < b.originalIndex) return -1;
+
     return 0;
   }
 
@@ -238,7 +245,8 @@ class ElizaBot {
       this.sentence = part;
       // loop trough keywords
       for (let k = 0; k < this.elizaKeywords.length; k++) {
-        if (part.search(new RegExp(`\\b${this.elizaKeywords[k][0]}\\b`, 'i')) >= 0) {
+        const { keyword } = this.elizaKeywords[k];
+        if (part.search(new RegExp(`\\b${keyword}\\b`, 'i')) >= 0) {
           reply = this.#execRule(k);
         }
         if (reply !== '') {
@@ -263,51 +271,64 @@ class ElizaBot {
     return reply || 'I am at a loss for words.';
   }
 
-  #execRule(k) {
-    const rule = this.elizaKeywords[k];
-    const decomps = rule[2];
-    const paramre = /\(([0-9]+)\)/;
-    for (let i = 0; i < decomps.length; i++) {
-      const m = this.sentence.match(decomps[i][0]);
+  /**
+   * @param {int} keywordIndex
+   * @returns {string} statement
+   */
+  #execRule(keywordIndex) {
+    const paramRegEx = /\(([0-9]+)\)/;
+    const { keyword, phrases, weight } = this.elizaKeywords[keywordIndex];
+    for (let i = 0; i < phrases.length; i++) {
+      const thisPhrase = phrases[i];
+      const m = this.sentence.match(thisPhrase.regEx);
       if (m !== null) {
-        const reasmbs = decomps[i][1];
-        const memflag = decomps[i][2];
-        let ri = (this.noRandom) ? 0 : Math.floor(Math.random() * reasmbs.length);
-        if (((this.noRandom) && (this.lastchoice[k][i] > ri)) || (this.lastchoice[k][i] === ri)) {
-          ri = ++this.lastchoice[k][i];
-          if (ri >= reasmbs.length) {
-            ri = 0;
-            this.lastchoice[k][i] = -1;
+        const { responses, useMemFlag } = thisPhrase;
+
+        let responseIndex = this.noRandom ? 0 : Math.floor(Math.random() * responses.length);
+        if ((this.noRandom && (this.lastchoice[keywordIndex][i] > responseIndex)) || (this.lastchoice[keywordIndex][i] === responseIndex)) {
+          responseIndex = ++this.lastchoice[keywordIndex][i];
+          if (responseIndex >= responses.length) {
+            responseIndex = 0;
+            this.lastchoice[keywordIndex][i] = -1;
           }
         } else {
-          this.lastchoice[k][i] = ri;
+          this.lastchoice[keywordIndex][i] = responseIndex;
         }
-        let rpl = reasmbs[ri];
+
+        let reply = responses[responseIndex];
         if (this.debug) {
           // eslint-disable-next-line no-console
-          console.log(`match:\nkey: ${this.elizaKeywords[k][0]}\nrank: ${this.elizaKeywords[k][1]}\ndecomp: ${decomps[i][0]}\nreasmb: ${rpl}\nmemflag: ${memflag}`);
+          console.log(`execRule match:\n  key: ${keyword}\n  weight: ${weight}\n  pattern: ${thisPhrase.pattern}\n  regEx: ${thisPhrase.regEx}\n  reasmb: ${reply}\n  useMemFlag: ${useMemFlag}`);
         }
-        if (rpl.search('^goto ', 'i') === 0) {
-          const ki = this.#getRuleIndexByKey(rpl.substring(5));
-          if (ki >= 0) return this.#execRule(ki);
-        }
-        // substitute positional params
-        let m1 = paramre.exec(rpl);
-        if (m1) {
-          let lp = '';
-          let rp = rpl;
-          while (m1) {
-            let param = m[parseInt(m1[1], 10)];
-            param = this.#elizaPosts.doSubstitutions(param);
-            lp += rp.substring(0, m1.index) + param;
-            rp = rp.substring(m1.index + m1[0].length);
-            m1 = paramre.exec(rp);
+
+        if (reply.search('^goto ', 'i') === 0) {
+          const gotoIndex = this.#getRuleIndexByKey(reply.substring(5));
+          if (gotoIndex >= 0) {
+            return this.#execRule(gotoIndex);
           }
-          rpl = lp + rp;
         }
-        rpl = this.#postTransform(rpl);
-        if (memflag) this.elizeMem.save(rpl);
-        else return rpl;
+
+        // substitute positional params
+        let posParamMatches = paramRegEx.exec(reply);
+        if (posParamMatches) {
+          let leftPart = '';
+          let rightPart = reply;
+          while (posParamMatches) {
+            let param = m[parseInt(posParamMatches[1], 10)];
+            param = this.#elizaPosts.doSubstitutions(param);
+            leftPart += rightPart.substring(0, posParamMatches.index) + param;
+            rightPart = rightPart.substring(posParamMatches.index + posParamMatches[0].length);
+            posParamMatches = paramRegEx.exec(rightPart);
+          }
+          reply = leftPart + rightPart;
+        }
+
+        reply = this.#postTransform(reply);
+        if (useMemFlag) {
+          this.elizeMem.save(reply);
+        } else {
+          return reply;
+        }
       }
     }
     return '';
@@ -336,7 +357,10 @@ class ElizaBot {
 
   #getRuleIndexByKey(key) {
     for (let k = 0; k < this.elizaKeywords.length; k++) {
-      if (this.elizaKeywords[k][0] === key) return k;
+      const { keyword } = this.elizaKeywords[k];
+      if (keyword === key) {
+        return k;
+      }
     }
     return -1;
   }

@@ -1,6 +1,12 @@
 {
   "version": "0.2.0",
   "configurations": [{
+    "name": "App",
+    "request": "launch",
+    "type": "node",
+    "program": "${workspaceRoot}/index.js",
+    "args": []
+  }, {
     "name": "Jest",
     "internalConsoleOptions": "openOnSessionStart",
     "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",

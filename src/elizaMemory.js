@@ -35,7 +35,7 @@ class ElizaMemory {
     if (this.#mem.length > this.#memSize) {
       this.#mem.shift();
     }
-    console.log(`Adding response ${phrase}`);
+    // console.log(`Adding response ${phrase}`);
   }
 
   get() {
@@ -49,7 +49,7 @@ class ElizaMemory {
 
     const index = Math.floor(Math.random() * this.#mem.length);
     const phrase = this.#mem[index];
-    console.log(`using memory response ${phrase}`);
+    // console.log(`using memory response ${phrase}`);
     for (let i = index + 1; i < this.#mem.length; i++) {
       this.#mem[i - 1] = this.#mem[i];
     }

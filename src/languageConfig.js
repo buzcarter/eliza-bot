@@ -9,26 +9,15 @@ const greetings = [
   'Thanks for waking me up',
 ];
 
-/**
- * Array of (see below)
- *
- * @example
- *  ["<key>", <rank>, [
- *    ["<decomp>", [
- *      "<reasmb>",
- *      "<reasmb>",
- *      "<reasmb>"
- *    ]],
- *    ["<decomp>", [
- *      "<reasmb>",
- *      "<reasmb>",
- *      "<reasmb>"
- *    ]]
- *  ]]
- */
-const keywords = [
-  ['xnone', 0, [
-    ['*', [
+const keywords = [{
+  keyword: 'xnone',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       "I'm not sure I understand you fully.",
       'Please go on.',
       'Can you repeat that please ?',
@@ -45,25 +34,46 @@ const keywords = [
       'Mmm hmmm. Is this is your favorite subject ?',
       'Now we are getting somewhere. Explain more.',
       'I see. How does that make you feel ?',
-    ]],
-  ]],
-  ['sorry', 0, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'sorry',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       "Please don't apologize.",
       'Apologies are not necessary.',
       "I've told you that apologies are not required.",
       'It did not bother me.  Please continue.',
       'I have no feelings. Do continue.',
       'There is nothing to worry about',
-    ]],
-  ]],
-  ['apologize', 0, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'apologize',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto sorry',
-    ]],
-  ]],
-  ['remember', 5, [
-    ['* i remember *', [
+    ],
+  }],
+}, {
+  keyword: 'remember',
+  weight: 5,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* i remember *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Do you often think of (2) ?',
       'Does thinking of (2) bring anything else to mind ?',
       'What else do you recollect ?',
@@ -71,22 +81,37 @@ const keywords = [
       'What in the present situation reminds you of (2) ?',
       'What is the connection between me and (2) ?',
       'What else does (2) remind you of ?',
-    ]],
-    ['* do you remember *', [
+    ],
+  }, {
+    pattern: '* do you remember *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Did you think I would forget (2) ?',
       'Why do you think I should recall (2) now ?',
       'What about (2) ?',
       'goto what',
       'You mentioned (2) ?',
-    ]],
-    ['* you remember *', [
+    ],
+  }, {
+    pattern: '* you remember *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'How could I forget (2) ?',
       'What about (2) should I remember ?',
       'goto you',
-    ]],
-  ]],
-  ['forget', 5, [
-    ['* i forget *', [
+    ],
+  }],
+}, {
+  keyword: 'forget',
+  weight: 5,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* i forget *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Can you think of why you might forget (2) ?',
       "Why can't you remember (2) ?",
       'How often do you think of (2) ?',
@@ -94,18 +119,29 @@ const keywords = [
       'Could it be a mental block ?',
       'Are you generally forgetful ?',
       'Do you think you are suppressing (2) ?',
-    ]],
-    ['* did you forget *', [
+    ],
+  }, {
+    pattern: '* did you forget *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Why do you ask ?',
       'Are you sure you told me ?',
       'Would it bother you if I forgot (2) ?',
       'Why should I recall (2) just now ?',
       'goto what',
       'Tell me more about (2).',
-    ]],
-  ]],
-  ['if', 3, [
-    ['* if *', [
+    ],
+  }],
+}, {
+  keyword: 'if',
+  weight: 3,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* if *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       "Do you think it's likely that (2) ?",
       'Do you wish that (2) ?',
       'What do you know about (2) ?',
@@ -113,82 +149,159 @@ const keywords = [
       'What would you do if (2) ?',
       'But what are the chances that (2) ?',
       'What does this speculation lead to ?',
-    ]],
-  ]],
-  ['dreamed', 4, [
-    ['* i dreamed *', [
+    ],
+  }],
+}, {
+  keyword: 'dreamed',
+  weight: 4,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* i dreamed *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Really, (2) ?',
       'Have you ever fantasized (2) while you were awake ?',
       'Have you ever dreamed (2) before ?',
       'goto dream',
-    ]],
-  ]],
-  ['dream', 3, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'dream',
+  weight: 3,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'What does that dream suggest to you ?',
       'Do you dream often ?',
       'What persons appear in your dreams ?',
       'Do you believe that dreams have something to do with your problem ?',
-    ]],
-  ]],
-  ['perhaps', 0, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'perhaps',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       "You don't seem quite certain.",
       'Why the uncertain tone ?',
       "Can't you be more positive ?",
       "You aren't sure ?",
       "Don't you know ?",
       'How likely, would you estimate ?',
-    ]],
-  ]],
-  ['name', 15, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'name',
+  weight: 15,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'I am not interested in names.',
       'OK, my name is bweezy. What do you need to know ?',
       "I've told you before, I don't care about names -- please continue.",
-    ]],
-  ]],
-  ['deutsch', 0, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'deutsch',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto xforeign',
       'Sorry I do not sprechen sie deutsch',
       "I told you before, I don't understand German.",
-    ]],
-  ]],
-  ['francais', 0, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'francais',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto xforeign',
       'Why? Do you love to go to France?',
       "I told you before, I don't understand French.",
-    ]],
-  ]],
-  ['italiano', 0, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'italiano',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto xforeign',
       'Have you been to Rome?',
       "I told you before, I don't understand Italian.",
-    ]],
-  ]],
-  ['espanol', 0, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'espanol',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto xforeign',
       'Sorry I do not speak Spanish',
       "I told you before, I don't understand Spanish.",
-    ]],
-  ]],
-  ['xforeign', 0, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'xforeign',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'I speak only English.',
-    ]],
-  ]],
-  ['hello', 0, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'hello',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'How do you do.  Please state your problem.',
       'Hi.  What seems to be your problem ?',
-    ]],
-  ]],
-  ['computer', 50, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'computer',
+  weight: 50,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Do computers worry you ?',
       'Why do you mention computers ?',
       'What do you think machines have to do with your problem ?',
@@ -196,26 +309,48 @@ const keywords = [
       'What about machines worries you ?',
       'What do you think about machines ?',
       "You don't think I am a computer program, do you ?",
-    ]],
-  ]],
-  ['am', 0, [
-    ['* am i *', [
+    ],
+  }],
+}, {
+  keyword: 'am',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* am i *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Do you believe you are (2) ?',
       'Would you want to be (2) ?',
       'Do you wish I would tell you you are (2) ?',
       'What would it mean if you were (2) ?',
       'goto what',
-    ]],
-    ['* i am *', [
+    ],
+  }, {
+    pattern: '* i am *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto i',
-    ]],
-    ['*', [
+    ],
+  }, {
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       "Why do you say 'am' ?",
       "I don't understand that.",
-    ]],
-  ]],
-  ['are', 0, [
-    ['* are you *', [
+    ],
+  }],
+}, {
+  keyword: 'are',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* are you *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Why are you interested in whether I am (2) or not ?',
       "Would you prefer if I weren't (2) ?",
       'Perhaps I am (2) in your fantasies.',
@@ -223,84 +358,144 @@ const keywords = [
       'goto what',
       'Would it matter to you ?',
       'What if I were (2) ?',
-    ]],
-    ['* you are *', [
+    ],
+  }, {
+    pattern: '* you are *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto you',
-    ]],
-    ['* are *', [
+    ],
+  }, {
+    pattern: '* are *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Did you think they might not be (2) ?',
       'Would you like it if they were not (2) ?',
       'What if they were not (2) ?',
       'Are they always (2) ?',
       'Possibly they are (2).',
       'Are you positive they are (2) ?',
-    ]],
-  ]],
-  ['your', 0, [
-    ['* your *', [
+    ],
+  }],
+}, {
+  keyword: 'your',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* your *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Why are you concerned over my (2) ?',
       'What about your own (2) ?',
       "Are you worried about someone else's (2) ?",
       'Really, my (2) ?',
       'What makes you think of my (2) ?',
       'Do you want my (2) ?',
-    ]],
-  ]],
-  ['was', 2, [
-    ['* was i *', [
+    ],
+  }],
+}, {
+  keyword: 'was',
+  weight: 2,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* was i *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'What if you were (2) ?',
       'Do you think you were (2) ?',
       'Were you (2) ?',
       'What would it mean if you were (2) ?',
       "What does ' (2) ' suggest to you ?",
       'goto what',
-    ]],
-    ['* i was *', [
+    ],
+  }, {
+    pattern: '* i was *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Were you really ?',
       'Why do you tell me you were (2) now ?',
       'Perhaps I already know you were (2).',
-    ]],
-    ['* was you *', [
+    ],
+  }, {
+    pattern: '* was you *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Would you like to believe I was (2) ?',
       'What suggests that I was (2) ?',
       'What do you think ?',
       'Perhaps I was (2).',
       'What if I had been (2) ?',
-    ]],
-  ]],
-  ['i', 0, [
-    ['* i @desire *', [
+    ],
+  }],
+}, {
+  keyword: 'i',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* i @desire *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'What would it mean to you if you got (3) ?',
       'Why do you want (3) ?',
       'Suppose you got (3) soon.',
       'What if you never got (3) ?',
       'What would getting (3) mean to you ?',
       'What does wanting (3) have to do with this discussion ?',
-    ]],
-    ['* i am* @sad *', [
+    ],
+  }, {
+    pattern: '* i am* @sad *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'I am sorry to hear that you are (3).',
       'Do you think coming here will help you not to be (3) ?',
       "I'm sure it's not pleasant to be (3).",
-      'Can you explain what made you (3) ?',
-    ]],
-    ['* i am* @happy *', [
+    ],
+  }, {
+    pattern: '* i am* @happy *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'How have I helped you to be (3) ?',
       'Has your treatment made you (3) ?',
       'What makes you (3) just now ?',
       'Can you explain why you are suddenly (3) ?',
-    ]],
-    ['* i was *', [
+    ],
+  }, {
+    pattern: '* i was *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto was',
-    ]],
-    ['* i @belief i *', [
+    ],
+  }, {
+    pattern: '* i @belief i *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Do you really think so ?',
       'But you are not sure you (3).',
       'Do you really doubt you (3) ?',
-    ]],
-    ['* i* @belief *you *', [
+    ],
+  }, {
+    pattern: '* i* @belief *you *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto you',
-    ]],
-    ['* i am *', [
+    ],
+  }, {
+    pattern: '* i am *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Is it because you are (2) that you came to me ?',
       'How long have you been (2) ?',
       'Do you believe it is normal to be (2) ?',
@@ -309,51 +504,86 @@ const keywords = [
       'Are you (2) because of your parents ?',
       'Are your friends (2) too ?',
       'Is your spouse (2) too ?',
-    ]],
-    ['* i @cannot *', [
+    ],
+  }, {
+    pattern: '* i @cannot *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       "How do you know that you can't (3) ?",
       'Have you tried ?',
       'Perhaps you could (3) now.',
       'Do you really want to be able to (3) ?',
       'What if you could (3) ?',
-    ]],
-    ["* i don't *", [
+    ],
+  }, {
+    pattern: "* i don't *",
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       "Don't you really (2) ?",
       "Why don't you (2) ?",
       'Do you wish to be able to (2) ?',
       'Does that trouble you ?',
-    ]],
-    ['* i feel *', [
+    ],
+  }, {
+    pattern: '* i feel *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Tell me more about such feelings.',
       'Do you often feel (2) ?',
       'Do you enjoy feeling (2) ?',
       'Of what does feeling (2) remind you ?',
-    ]],
-    ['* i * you *', [
+    ],
+  }, {
+    pattern: '* i * you *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Perhaps in your fantasies we (2) each other.',
       'Do you wish to (2) me ?',
       'You seem to need to (2) me.',
       'Do you (2) anyone else ?',
-    ]],
-    ['*', [
+    ],
+  }, {
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'You say (1) ?',
       'Can you elaborate on that ?',
       'Do you say (1) for some special reason ?',
       '(1). Really?',
       'When did you first think about (1)',
-    ]],
-  ]],
-  ['you', 0, [
-    ['* you remind me of *', [
+    ],
+  }],
+}, {
+  keyword: 'you',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* you remind me of *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto alike',
-    ]],
-    ['* you are *', [
+    ],
+  }, {
+    pattern: '* you are *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'What makes you think I am (2) ?',
       'Does it please you to believe I am (2) ?',
       'Do you sometimes wish you were (2) ?',
       'Perhaps you would like to be (2).',
-    ]],
-    ['* you* me *', [
+    ],
+  }, {
+    pattern: '* you* me *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Why do you think I (2) you ?',
       "You like to think I (2) you -- don't you ?",
       'What makes you think I (2) you ?',
@@ -361,24 +591,42 @@ const keywords = [
       'Do you wish to believe I (2) you ?',
       'Suppose I did (2) you -- what would that mean ?',
       'Does someone else believe I (2) you ?',
-    ]],
-    ['* you *', [
+    ],
+  }, {
+    pattern: '* you *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'We were discussing you -- not me.',
       'Oh, I (2) ?',
       "You're not really talking about me -- are you ?",
       'What are your feelings now ?',
-    ]],
-  ]],
-  ['yes', 0, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'yes',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'You seem to be quite positive.',
       'You are sure.',
       'I see.',
       'I understand.',
-    ]],
-  ]],
-  ['no', 0, [
-    ['* no one *', [
+    ],
+  }],
+}, {
+  keyword: 'no',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* no one *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Are you sure, no one (2) ?',
       'Surely someone (2) .',
       'Can you think of anyone at all ?',
@@ -386,52 +634,89 @@ const keywords = [
       'Who, may I ask ?',
       "You have a particular person in mind, don't you ?",
       'Who do you think you are talking about ?',
-    ]],
-    ['*', [
+    ],
+  }, {
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Are you saying no just to be negative?',
       'You are being a bit negative.',
       'Why not ?',
       "Why 'no' ?",
-    ]],
-  ]],
-  ['my', 2, [
-    ['$ * my *', [
+    ],
+  }],
+}, {
+  keyword: 'my',
+  weight: 2,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '$ * my *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Does that have anything to do with the fact that your (2) ?',
       'Lets discuss further why your (2).',
       'Earlier you said your (2).',
       'But your (2).',
-    ]],
-    ['* my* @family *', [
+    ],
+  }, {
+    pattern: '* my* @family *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Tell me more about your family.',
       'Who else in your family (4) ?',
       'Your (3) ?',
       'What else comes to your mind when you think of your (3) ?',
-    ]],
-    ['* my *', [
+    ],
+  }, {
+    pattern: '* my *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Your (2) ?',
       'Why do you say your (2) ?',
       'Do you like your (2) ',
       'Do you have more than 1 (2) ?',
       'Does that suggest anything else which belongs to you ?',
       'Is it important to you that you have your (2) ?',
-    ]],
-  ]],
-  ['can', 0, [
-    ['* can you *', [
+    ],
+  }],
+}, {
+  keyword: 'can',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* can you *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       "You believe I can (2) don't you ?",
       'goto what',
       'You want me to be able to (2).',
       'Perhaps you would like to be able to (2) yourself.',
-    ]],
-    ['* can i *', [
+    ],
+  }, {
+    pattern: '* can i *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Whether or not you can (2) depends on you more than on me.',
       'Do you want to be able to (2) ?',
       "Perhaps you don't want to (2).",
       'goto what',
-    ]],
-  ]],
-  ['what', 0, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'what',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Why do you ask ?',
       'Does that question interest you ?',
       'What is it you really want to know ?',
@@ -441,57 +726,114 @@ const keywords = [
       'What comes to mind when you ask that ?',
       'Have you asked such questions before ?',
       'Have you asked anyone else ?',
-    ]],
-  ]],
-  ['who', 0, [
-    ['who *', [
+    ],
+  }],
+}, {
+  keyword: 'who',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: 'who *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto what',
-    ]],
-  ]],
-  ['when', 0, [
-    ['when *', [
+    ],
+  }],
+}, {
+  keyword: 'when',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: 'when *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto what',
-    ]],
-  ]],
-  ['where', 0, [
-    ['where *', [
+    ],
+  }],
+}, {
+  keyword: 'where',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: 'where *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto what',
-    ]],
-  ]],
-  ['how', 0, [
-    ['how *', [
+    ],
+  }],
+}, {
+  keyword: 'how',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: 'how *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto what',
-    ]],
-  ]],
-  ['because', 0, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'because',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Is that the real reason ?',
       "Don't any other reasons come to mind ?",
       'Does that reason seem to explain anything else ?',
       'What other reasons might there be ?',
-    ]],
-  ]],
-  ['why', 0, [
-    ["* why don't you *", [
+    ],
+  }],
+}, {
+  keyword: 'why',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: "* why don't you *",
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       "Do you believe I don't (2) ?",
       'Perhaps I will (2) in good time.',
       'Should you (2) yourself ?',
       'You want me to (2) ?',
       'goto what',
-    ]],
-    ["* why can't i *", [
+    ],
+  }, {
+    pattern: "* why can't i *",
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Do you think you should be able to (2) ?',
       'Do you want to be able to (2) ?',
       'Do you believe this will help you to (2) ?',
       "Have you any idea why you can't (2) ?",
       'goto what',
-    ]],
-    ['*', [
+    ],
+  }, {
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto what',
-    ]],
-  ]],
-  ['everyone', 2, [
-    ['* @everyone *', [
+    ],
+  }],
+}, {
+  keyword: 'everyone',
+  weight: 2,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* @everyone *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Really, (2) ?',
       'Surely not (2).',
       'Can you think of anyone in particular ?',
@@ -501,33 +843,68 @@ const keywords = [
       'Someone special perhaps ?',
       "You have a particular person in mind, don't you ?",
       "Who do you think you're talking about ?",
-    ]],
-  ]],
-  ['everybody', 2, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'everybody',
+  weight: 2,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto everyone',
-    ]],
-  ]],
-  ['nobody', 2, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'nobody',
+  weight: 2,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto everyone',
-    ]],
-  ]],
-  ['noone', 2, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'noone',
+  weight: 2,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto everyone',
-    ]],
-  ]],
-  ['always', 1, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'always',
+  weight: 1,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'Can you think of a specific example ?',
       'When ?',
       'What incident are you thinking of ?',
       'Really, always ?',
-    ]],
-  ]],
-  ['alike', 10, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'alike',
+  weight: 10,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'In what way ?',
       'What resemblence do you see ?',
       'What does that similarity suggest to you ?',
@@ -536,15 +913,29 @@ const keywords = [
       'What is the connection, do you suppose ?',
       'Could there really be some connection ?',
       'How ?',
-    ]],
-  ]],
-  ['like', 10, [
-    ['* @be *like *', [
+    ],
+  }],
+}, {
+  keyword: 'like',
+  weight: 10,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '* @be *like *',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'goto alike',
-    ]],
-  ]],
-  ['different', 0, [
-    ['*', [
+    ],
+  }],
+}, {
+  keyword: 'different',
+  weight: 0,
+  originalIndex: -1,
+  phrases: [{
+    pattern: '*',
+    regEx: null,
+    useMemFlag: false,
+    responses: [
       'How is it different ?',
       'What differences do you see ?',
       'What does that difference suggest to you ?',
@@ -552,9 +943,9 @@ const keywords = [
       'What do you suppose that disparity means ?',
       'Could there be some connection, do you suppose ?',
       'How ?',
-    ]],
-  ]],
-];
+    ],
+  }],
+}];
 
 const postTransforms = [
   / old old/g,                 ' old',
