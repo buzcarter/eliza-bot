@@ -1,17 +1,7 @@
 const ElizaMemory = require('./elizaMemory');
 const SimpleReplacements = require('./SimpleReplacements');
 const langConfig = require('./languageConfig');
-
-const pickRandom = (ary) => ((!ary) ? '' : ary[Math.floor(Math.random() * ary.length)]);
-
-/** capitalize first char */
-function capitalizeFirstLetter(text) {
-  const re = /^([a-z])/;
-  const m = re.exec(text);
-  return m
-    ? m[0].toUpperCase() + text.substring(1)
-    : text;
-}
+const { initCap, pickRandom } = require('./utils');
 
 class ElizaBot {
   version = null;
@@ -384,18 +374,12 @@ class ElizaBot {
       });
     }
 
-    return this.#capitalizeFirstLetterEnabled ? capitalizeFirstLetter(text) : text;
+    return this.#capitalizeFirstLetterEnabled ? initCap(text) : text;
   }
   /* eslint-enable no-param-reassign */
 
   #getRuleIndexByKey(key) {
-    for (let k = 0; k < this.keywordsList.length; k++) {
-      const { keyword } = this.keywordsList[k];
-      if (keyword === key) {
-        return k;
-      }
-    }
-    return -1;
+    return this.keywordsList.findIndex(({ keyword }) => keyword === key);
   }
 
   // eslint-disable-next-line class-methods-use-this

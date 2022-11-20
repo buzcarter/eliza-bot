@@ -14,20 +14,6 @@ const asciiDuck = `
   \`---'
 `;
 
-const silencePrompts = [
-  'You seem distracted. Should we resume later?',
-  'If you\'re busy we can pick up where we\'ve left off later',
-  'Perhaps this is a good stopping point. We can do this later if you like.',
-  'Should we stop here?',
-  'You seem reluctant to chat. Is anything else bothering you?',
-  'Do you need to work on something else?',
-  'Is this not a good time?',
-];
-
-const silenceTerminations = [
-  'Let\'s stop here and pickup later when you\'re able to chat with without interrruptions. I\'m here whenever you\'d like, you know that',
-];
-
 function endSession() {
   console.log(asciiDuck);
   process.exit(0);
@@ -38,33 +24,29 @@ function randomPrompt() {
   const silenceComfort = Math.floor(Math.random() * (3 * SILENCE_LENGTH) + SILENCE_LENGTH);
 
   if (numberOfSilences > MAX_NUMBER_OF_SILENCES) {
-    const goodbye = silenceTerminations[Math.floor(Math.random() * silenceTerminations.length)];
-    console.log(goodbye);
+    console.log(elizabot.silenceGoodbye());
     endSession();
   }
 
   if (nowTime - lastInteractionTime > silenceComfort) {
-    const prompt = silencePrompts[Math.floor(Math.random() * silencePrompts.length)];
-    console.log(prompt);
+    console.log(elizabot.silencePrompt());
     lastInteractionTime = Date.now();
     numberOfSilences++;
   }
 }
 
-function provideFeedback(patientQuery) {
+function provideFeedback(inputText) {
   lastInteractionTime = Date.now();
   numberOfSilences = 0;
 
-  const reply = elizabot.reply(patientQuery);
-  console.log(reply);
+  console.log(elizabot.reply(inputText));
   if (elizabot.hasQuit()) {
     endSession();
   }
 }
 
 function main() {
-  const hello = elizabot.start();
-  console.log(hello);
+  console.log(elizabot.greeting());
 
   setInterval(randomPrompt, SILENCE_LENGTH);
 
