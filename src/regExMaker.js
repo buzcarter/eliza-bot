@@ -1,5 +1,10 @@
 const langConfig = require('./languageConfig');
 
+const RegExStr = {
+  BOUNDARY: '\\b',
+  WILDCARD: '\\s*(.*)\\s*',
+};
+
 const regExes = {
   /** finds "`@happy`" within "`* i am* @happy *`" */
   AT_VAR_NAMES: /@(\S+)/,
@@ -29,73 +34,72 @@ function buildSynonymHash() {
 
 function make(pattern) {
   let useMemFlag = false;
-  let newRegExStr = pattern;
+  let regEx = pattern;
 
   // check mem flag and store it as decomp's element 2
-  if (newRegExStr.charAt(0) === '$') {
+  if (regEx.charAt(0) === '$') {
     let offset = 1;
-    while (newRegExStr.charAt[offset] === ' ') offset++;
-    newRegExStr = newRegExStr.substring(offset);
+    while (regEx.charAt[offset] === ' ') offset++;
+    regEx = regEx.substring(offset);
     useMemFlag = true;
   }
 
   // expand synonyms
-  let atVarsMatches = regExes.AT_VAR_NAMES.exec(newRegExStr);
+  let atVarsMatches = regExes.AT_VAR_NAMES.exec(regEx);
   while (atVarsMatches) {
     const synonTxt = synPatterns[atVarsMatches[1]] ? synPatterns[atVarsMatches[1]] : atVarsMatches[1];
-    newRegExStr = newRegExStr.substring(0, atVarsMatches.index) + synonTxt + newRegExStr.substring(atVarsMatches.index + atVarsMatches[0].length);
-    atVarsMatches = regExes.AT_VAR_NAMES.exec(newRegExStr);
+    regEx = regEx.substring(0, atVarsMatches.index) + synonTxt + regEx.substring(atVarsMatches.index + atVarsMatches[0].length);
+    atVarsMatches = regExes.AT_VAR_NAMES.exec(regEx);
   }
 
   // expand asterisk expressions
-  if (regExes.WILDCARD.test(newRegExStr)) {
-    newRegExStr = '\\s*(.*)\\s*';
+  if (regExes.WILDCARD.test(regEx)) {
+    regEx = RegExStr.WILDCARD;
   } else {
-    let inlineMatches = regExes.INLINE_WILDCARD.exec(newRegExStr);
+    let inlineMatches = regExes.INLINE_WILDCARD.exec(regEx);
     if (inlineMatches) {
       let leftPart = '';
-      let rightPart = newRegExStr;
+      let rightPart = regEx;
       while (inlineMatches) {
         leftPart += rightPart.substring(0, inlineMatches.index + 1);
         if (inlineMatches[1] !== ')') {
-          leftPart += '\\b';
+          leftPart += RegExStr.BOUNDARY;
         }
-        leftPart += '\\s*(.*)\\s*';
+        leftPart += RegExStr.WILDCARD;
         if ((inlineMatches[2] !== '(') && (inlineMatches[2] !== '\\')) {
-          leftPart += '\\b';
+          leftPart += RegExStr.BOUNDARY;
         }
         leftPart += inlineMatches[2];
         rightPart = rightPart.substring(inlineMatches.index + inlineMatches[0].length);
         inlineMatches = regExes.INLINE_WILDCARD.exec(rightPart);
       }
-      newRegExStr = leftPart + rightPart;
+      regEx = leftPart + rightPart;
     }
 
-    const startsMatches = regExes.STARTS_WITH_WILDCARD.exec(newRegExStr);
+    const startsMatches = regExes.STARTS_WITH_WILDCARD.exec(regEx);
     if (startsMatches) {
-      let patternTxt = '\\s*(.*)\\s*';
+      let patternTxt = RegExStr.WILDCARD;
       if ((startsMatches[1] !== ')') && (startsMatches[1] !== '\\')) {
-        patternTxt += '\\b';
+        patternTxt += RegExStr.BOUNDARY;
       }
-      newRegExStr = patternTxt + newRegExStr.substring(startsMatches.index - 1 + startsMatches[0].length);
+      regEx = patternTxt + regEx.substring(startsMatches.index - 1 + startsMatches[0].length);
     }
 
-    const endsMatches = regExes.ENDS_WITH_WILDCARD.exec(newRegExStr);
+    const endsMatches = regExes.ENDS_WITH_WILDCARD.exec(regEx);
     if (endsMatches) {
-      let patternTxt = newRegExStr.substring(0, endsMatches.index + 1);
+      let patternTxt = regEx.substring(0, endsMatches.index + 1);
       if (endsMatches[1] !== '(') {
-        patternTxt += '\\b';
+        patternTxt += RegExStr.BOUNDARY;
       }
-      newRegExStr = `${patternTxt}\\s*(.*)\\s*`;
+      regEx = `${patternTxt}${RegExStr.WILDCARD}`;
     }
   }
 
   // expand white space
-  newRegExStr = newRegExStr.replace(regExes.WHITESPACE, '\\s+');
+  regEx = regEx.replace(regExes.WHITESPACE, '\\s+');
 
-  regExes.WHITESPACE.lastIndex = 0;
   return {
-    regEx: newRegExStr,
+    regEx,
     useMemFlag,
   };
 }
