@@ -1,7 +1,9 @@
-const ElizaMemory = require('./elizaMemory');
-const SimpleReplacements = require('./SimpleReplacements');
-const langConfig = require('./languageConfig');
 const { initCap, pickRandom } = require('./utils');
+const ElizaMemory = require('./elizaMemory');
+const langConfig = require('./languageConfig');
+const regExMaker = require('./regExMaker');
+const SimpleReplacements = require('./SimpleReplacements');
+
 const { NO_MATCH_KEYWORD } = langConfig;
 
 class ElizaBot {
@@ -22,8 +24,6 @@ class ElizaBot {
   postsHash = null;
 
   postTransformsList = null;
-
-  synonymsHash = null;
 
   /** 2-Dimensional array of last {responseIndex} `[{keywordIndex}][{phraseIndex}]` */
   lastchoice = [];
@@ -56,7 +56,6 @@ class ElizaBot {
     this.keywordsList = langConfig.keywords;
     this.postTransformsList = langConfig.postTransforms;
     this.postsHash = langConfig.post;
-    this.synonymsHash = langConfig.synonyms;
 
     const { debugEnabled, noRandom } = opts || {};
     this.#noRandomResponsesEnabled = Boolean(noRandom);
@@ -106,33 +105,6 @@ class ElizaBot {
 
   /** parse data and convert it from canonical form to internal use */
   #expandKeywords() {
-    // generate synonym list
-    const synPatterns = {};
-
-    if (this.synonymsHash && typeof this.synonymsHash === 'object') {
-      // eslint-disable-next-line guard-for-in, no-restricted-syntax
-      for (const i in this.synonymsHash) {
-        synPatterns[i] = `(${i}|${this.synonymsHash[i].join('|')})`;
-      }
-    }
-
-    // 1st convert rules to regexps
-
-    const regExes = {
-      /** finds "`@happy`" within "`* i am* @happy *`" */
-      AT_VAR_NAMES: /@(\S+)/,
-      /** Inline "*", finds "`u *r`" within "`* do you *remember *`" */
-      INLINE_WILDCARD: /(\S)\s*\*\s*(\S)/,
-      /** Starts with a wildcard, finds "`* a`" within "`* are you *`" */
-      STARTS_WITH_WILDCARD: /^\s*\*\s*(\S)/,
-      /** Ends with a wildcard, finds "`u *`" within "`* are you *`" */
-      ENDS_WITH_WILDCARD: /(\S)\s*\*\s*$/,
-      /** looks for "`*`" even if it's surrounded by spaces "`   *   `" */
-      WILDCARD: /^\s*\*\s*$/,
-      /** One or more spaces (anywhere) */
-      WHITESPACE: /\s+/g,
-    };
-
     // check for keywords or install empty structure to prevent any errors
     if (!Array.isArray(this.keywordsList) || !this.keywordsList.length) {
       this.keywordsList = [{
@@ -148,86 +120,20 @@ class ElizaBot {
       }];
     }
 
+    regExMaker.init();
+
+    /* eslint-disable no-param-reassign */
     // expand synonyms and insert asterisk expressions for backtracking
     this.keywordsList.forEach((keywordEntry, k) => {
-      // eslint-disable-next-line no-param-reassign
-      keywordEntry.originalIndex = k; // save original index for sorting
+      // save original index for sorting
+      keywordEntry.originalIndex = k;
       keywordEntry.phrases.forEach((thisPhrase) => {
-        let newRegExStr = thisPhrase.pattern;
-
-        // check mem flag and store it as decomp's element 2
-        if (newRegExStr.charAt(0) === '$') {
-          let offset = 1;
-          while (newRegExStr.charAt[offset] === ' ') offset++;
-          newRegExStr = newRegExStr.substring(offset);
-          // eslint-disable-next-line no-param-reassign
-          thisPhrase.useMemFlag = true;
-        } else {
-          // eslint-disable-next-line no-param-reassign
-          thisPhrase.useMemFlag = false;
-        }
-
-        // expand synonyms
-        let atVarsMatches = regExes.AT_VAR_NAMES.exec(newRegExStr);
-        while (atVarsMatches) {
-          const synonTxt = synPatterns[atVarsMatches[1]] ? synPatterns[atVarsMatches[1]] : atVarsMatches[1];
-          newRegExStr = newRegExStr.substring(0, atVarsMatches.index) + synonTxt + newRegExStr.substring(atVarsMatches.index + atVarsMatches[0].length);
-          atVarsMatches = regExes.AT_VAR_NAMES.exec(newRegExStr);
-        }
-
-        // expand asterisk expressions
-        if (regExes.WILDCARD.test(newRegExStr)) {
-          newRegExStr = '\\s*(.*)\\s*';
-        } else {
-          let inlineMatches = regExes.INLINE_WILDCARD.exec(newRegExStr);
-          if (inlineMatches) {
-            let leftPart = '';
-            let rightPart = newRegExStr;
-            while (inlineMatches) {
-              leftPart += rightPart.substring(0, inlineMatches.index + 1);
-              if (inlineMatches[1] !== ')') {
-                leftPart += '\\b';
-              }
-              leftPart += '\\s*(.*)\\s*';
-              if ((inlineMatches[2] !== '(') && (inlineMatches[2] !== '\\')) {
-                leftPart += '\\b';
-              }
-              leftPart += inlineMatches[2];
-              rightPart = rightPart.substring(inlineMatches.index + inlineMatches[0].length);
-              inlineMatches = regExes.INLINE_WILDCARD.exec(rightPart);
-            }
-            newRegExStr = leftPart + rightPart;
-          }
-
-          const startsMatches = regExes.STARTS_WITH_WILDCARD.exec(newRegExStr);
-          if (startsMatches) {
-            let patternTxt = '\\s*(.*)\\s*';
-            if ((startsMatches[1] !== ')') && (startsMatches[1] !== '\\')) {
-              patternTxt += '\\b';
-            }
-            newRegExStr = patternTxt + newRegExStr.substring(startsMatches.index - 1 + startsMatches[0].length);
-          }
-
-          const endsMatches = regExes.ENDS_WITH_WILDCARD.exec(newRegExStr);
-          if (endsMatches) {
-            let patternTxt = newRegExStr.substring(0, endsMatches.index + 1);
-            if (endsMatches[1] !== '(') {
-              patternTxt += '\\b';
-            }
-            newRegExStr = `${patternTxt}\\s*(.*)\\s*`;
-          }
-        }
-
-        // expand white space
-        newRegExStr = newRegExStr.replace(regExes.WHITESPACE, '\\s+');
-
-        // eslint-disable-next-line no-param-reassign
-        thisPhrase.regEx = newRegExStr;
-        console.log(JSON.stringify({ value: thisPhrase.pattern, expectedResult: thisPhrase.regEx }));
-
-        regExes.WHITESPACE.lastIndex = 0;
+        const { regEx, useMemFlag } = regExMaker.make(thisPhrase.pattern);
+        thisPhrase.regEx = regEx;
+        thisPhrase.useMemFlag = useMemFlag;
       });
     });
+    /* eslint-enable no-param-reassign */
 
     // now sort keywords by weight (highest first)
     this.keywordsList.sort(ElizaBot.#sortKeywords);
