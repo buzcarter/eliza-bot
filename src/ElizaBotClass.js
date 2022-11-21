@@ -2,6 +2,7 @@ const ElizaMemory = require('./elizaMemory');
 const SimpleReplacements = require('./SimpleReplacements');
 const langConfig = require('./languageConfig');
 const { initCap, pickRandom } = require('./utils');
+const { NO_MATCH_KEYWORD } = langConfig;
 
 class ElizaBot {
   version = null;
@@ -184,9 +185,13 @@ class ElizaBot {
             let rightPart = newRegExStr;
             while (inlineMatches) {
               leftPart += rightPart.substring(0, inlineMatches.index + 1);
-              if (inlineMatches[1] !== ')') leftPart += '\\b';
+              if (inlineMatches[1] !== ')') {
+                leftPart += '\\b';
+              }
               leftPart += '\\s*(.*)\\s*';
-              if ((inlineMatches[2] !== '(') && (inlineMatches[2] !== '\\')) leftPart += '\\b';
+              if ((inlineMatches[2] !== '(') && (inlineMatches[2] !== '\\')) {
+                leftPart += '\\b';
+              }
               leftPart += inlineMatches[2];
               rightPart = rightPart.substring(inlineMatches.index + inlineMatches[0].length);
               inlineMatches = regExes.INLINE_WILDCARD.exec(rightPart);
@@ -197,14 +202,18 @@ class ElizaBot {
           const startsMatches = regExes.STARTS_WITH_WILDCARD.exec(newRegExStr);
           if (startsMatches) {
             let patternTxt = '\\s*(.*)\\s*';
-            if ((startsMatches[1] !== ')') && (startsMatches[1] !== '\\')) patternTxt += '\\b';
+            if ((startsMatches[1] !== ')') && (startsMatches[1] !== '\\')) {
+              patternTxt += '\\b';
+            }
             newRegExStr = patternTxt + newRegExStr.substring(startsMatches.index - 1 + startsMatches[0].length);
           }
 
           const endsMatches = regExes.ENDS_WITH_WILDCARD.exec(newRegExStr);
           if (endsMatches) {
             let patternTxt = newRegExStr.substring(0, endsMatches.index + 1);
-            if (endsMatches[1] !== '(') patternTxt += '\\b';
+            if (endsMatches[1] !== '(') {
+              patternTxt += '\\b';
+            }
             newRegExStr = `${patternTxt}\\s*(.*)\\s*`;
           }
         }
@@ -214,6 +223,7 @@ class ElizaBot {
 
         // eslint-disable-next-line no-param-reassign
         thisPhrase.regEx = newRegExStr;
+        console.log(JSON.stringify({ value: thisPhrase.pattern, expectedResult: thisPhrase.regEx }));
 
         regExes.WHITESPACE.lastIndex = 0;
       });
@@ -282,9 +292,9 @@ class ElizaBot {
     // if nothing in mem so try xnone
     if (reply === '') {
       this.sentence = ' ';
-      const k = this.#getRuleIndexByKey('xnone');
-      if (k >= 0) {
-        reply = this.#execRule(k);
+      const index = this.#getRuleIndexByKey(NO_MATCH_KEYWORD);
+      if (index >= 0) {
+        reply = this.#execRule(index);
       }
     }
 
@@ -328,11 +338,9 @@ class ElizaBot {
           console.log(`execRule match:\n  key: ${keyword}\n  weight: ${weight}\n  pattern: ${thisPhrase.pattern}\n  regEx: ${thisPhrase.regEx}\n  reasmb: ${reply}\n  useMemFlag: ${useMemFlag}`);
         }
 
-        if (reply.search('^goto ', 'i') === 0) {
-          const gotoIndex = this.#getRuleIndexByKey(reply.substring(5));
-          if (gotoIndex >= 0) {
-            return this.#execRule(gotoIndex);
-          }
+        if (reply.goto) {
+          const index = this.#getRuleIndexByKey(reply.goto);
+          return this.#execRule(index > -1 ? index : this.#getRuleIndexByKey(NO_MATCH_KEYWORD));
         }
 
         // substitute positional params
