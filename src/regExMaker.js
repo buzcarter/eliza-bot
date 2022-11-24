@@ -10,7 +10,7 @@ const regExes = {
   USE_SYNONYM: /@(\S+)/g,
 
   /** Inline "*", finds "`u *r`" within "`* do you *remember *`" */
-  INLINE_WILDCARD: /(\S)\s*\*\s*(\S)/,
+  INLINE_WILDCARD: /(\S)\s*\*\s*(\S)/g,
 
   /** Starts with a wildcard, finds "`* a`" within "`* are you *`" */
   STARTS_WITH_WILDCARD: /^\s*\*\s*(\S)/,
@@ -40,43 +40,38 @@ function buildSynonymHash() {
 }
 
 function endsWithWildcard(regEx) {
-  if (!regExes.ENDS_WITH_WILDCARD.test(regEx)) {
-    return regEx;
-  }
-
   // TODO: legacy meaning of "matches[1] !== '('"
-  return regEx.replace(regExes.ENDS_WITH_WILDCARD, `$1${RegExStr.BOUNDARY}${RegExStr.WILDCARD}`);
+  return regExes.ENDS_WITH_WILDCARD.test(regEx)
+    ? regEx.replace(regExes.ENDS_WITH_WILDCARD, `$1${RegExStr.BOUNDARY}${RegExStr.WILDCARD}`)
+    : regEx;
 }
 
 function inlineWildcards(regEx) {
-  if (regExes.INLINE_WILDCARD.test(regEx)) {
-    let matches = regExes.INLINE_WILDCARD.exec(regEx);
-    let leftPart = '';
-    let rightPart = regEx;
-    while (matches) {
-      leftPart += rightPart.substring(0, matches.index + 1);
-      if (matches[1] !== ')') {
-        leftPart += RegExStr.BOUNDARY;
-      }
-      leftPart += RegExStr.WILDCARD;
-      if ((matches[2] !== '(') && (matches[2] !== '\\')) {
-        leftPart += RegExStr.BOUNDARY;
-      }
-      leftPart += matches[2];
-      rightPart = rightPart.substring(matches.index + matches[0].length);
-      matches = regExes.INLINE_WILDCARD.exec(rightPart);
-    }
-    regEx = leftPart + rightPart;
+  if (!regExes.INLINE_WILDCARD.test(regEx)) {
+    return regEx;
   }
-  return regEx;
+
+  const z = /(\S)\s*\*\s*(\S)/;
+
+  return regEx.replace(regExes.INLINE_WILDCARD, (phrase) => {
+    let [, firstChar, lastChar] = phrase.match(z);
+    if (firstChar !== ')') {
+      firstChar += RegExStr.BOUNDARY;
+    }
+
+    if ((lastChar !== '(') && (lastChar !== '\\')) {
+      lastChar = RegExStr.BOUNDARY + lastChar;
+    }
+
+    return `${firstChar}${RegExStr.WILDCARD}${lastChar}`;
+  });
 }
 
 function startsWithWildcard(regEx) {
-  if (!regExes.STARTS_WITH_WILDCARD.test(regEx)) {
-    return regEx;
-  }
   // TODO: legacy meaning of "if ((matches[1] !== ')') && (matches[1] !== '\\')) {"
-  return regEx.replace(regExes.STARTS_WITH_WILDCARD, `${RegExStr.WILDCARD}${RegExStr.BOUNDARY}$1`);
+  return regExes.STARTS_WITH_WILDCARD.test(regEx)
+    ? regEx.replace(regExes.STARTS_WITH_WILDCARD, `${RegExStr.WILDCARD}${RegExStr.BOUNDARY}$1`)
+    : regEx;
 }
 
 function make(pattern) {

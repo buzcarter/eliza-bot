@@ -56,8 +56,8 @@ describe('regExMaker', () => {
       value: '* i (desire|want|need) *',
       expectedResult: '\\s*(.*)\\s*\\bi (desire|want|need) *',
     }, {
-      value: '* i am\\b\\s*(.*)\\s*(sad|unhappy|depressed|sick) *',
-      expectedResult: '\\s*(.*)\\s*\\bi am\\b\\s*(.*)\\s*(sad|unhappy|depressed|sick) *',
+      value: '* i am tickled pink *',
+      expectedResult: '\\s*(.*)\\s*\\bi am tickled pink *',
     }, {
       value: '* i am\\b\\s*(.*)\\s*(happy|elated|glad|better) *',
       expectedResult: '\\s*(.*)\\s*\\bi am\\b\\s*(.*)\\s*(happy|elated|glad|better) *',
