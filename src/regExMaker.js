@@ -40,15 +40,11 @@ function buildSynonymHash() {
 }
 
 function endsWithWildcard(regEx) {
-  if (regExes.ENDS_WITH_WILDCARD.test(regEx)) {
-    const matches = regExes.ENDS_WITH_WILDCARD.exec(regEx);
-    let patternTxt = regEx.substring(0, matches.index + 1);
-    if (matches[1] !== '(') {
-      patternTxt += RegExStr.BOUNDARY;
-    }
-    regEx = `${patternTxt}${RegExStr.WILDCARD}`;
+  if (!regExes.ENDS_WITH_WILDCARD.test(regEx)) {
+    return regEx;
   }
-  return regEx;
+
+  return regEx.replace(regExes.ENDS_WITH_WILDCARD, `$1${RegExStr.BOUNDARY}${RegExStr.WILDCARD}`);
 }
 
 function inlineWildcards(regEx) {
