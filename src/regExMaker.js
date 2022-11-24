@@ -44,6 +44,7 @@ function endsWithWildcard(regEx) {
     return regEx;
   }
 
+  // TODO: legacy meaning of "matches[1] !== '('"
   return regEx.replace(regExes.ENDS_WITH_WILDCARD, `$1${RegExStr.BOUNDARY}${RegExStr.WILDCARD}`);
 }
 
@@ -71,15 +72,11 @@ function inlineWildcards(regEx) {
 }
 
 function startsWithWildcard(regEx) {
-  if (regExes.STARTS_WITH_WILDCARD.test(regEx)) {
-    const matches = regExes.STARTS_WITH_WILDCARD.exec(regEx);
-    let patternTxt = RegExStr.WILDCARD;
-    if ((matches[1] !== ')') && (matches[1] !== '\\')) {
-      patternTxt += RegExStr.BOUNDARY;
-    }
-    regEx = patternTxt + regEx.substring(matches.index - 1 + matches[0].length);
+  if (!regExes.STARTS_WITH_WILDCARD.test(regEx)) {
+    return regEx;
   }
-  return regEx;
+  // TODO: legacy meaning of "if ((matches[1] !== ')') && (matches[1] !== '\\')) {"
+  return regEx.replace(regExes.STARTS_WITH_WILDCARD, `${RegExStr.WILDCARD}${RegExStr.BOUNDARY}$1`);
 }
 
 function make(pattern) {
