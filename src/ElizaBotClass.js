@@ -129,8 +129,11 @@ class ElizaBot {
       keywordEntry.originalIndex = k;
       keywordEntry.phrases.forEach((thisPhrase) => {
         const { regEx, useMemFlag } = regExMaker.make(thisPhrase.pattern);
-        thisPhrase.regEx = regEx;
-        thisPhrase.useMemFlag = useMemFlag;
+
+        Object.assign(thisPhrase, {
+          regEx,
+          useMemFlag,
+        });
       });
     });
     /* eslint-enable no-param-reassign */
@@ -149,34 +152,39 @@ class ElizaBot {
     return 0;
   }
 
-  getReply(inputText) {
-    this.quit = false;
-
-    // unify text string
-    // eslint-disable-next-line no-param-reassign
-    inputText = inputText
-      .toLowerCase()
+  /**
+   * Split text in partial sentences.
+   *
+   * * strips noise (characters such as "$", "(")
+   * * compacts whitespace
+   * * fragments at each break (such as "but", ".", ",", "?", "-")
+   *
+   * @returns {[string]} Returns array of compacted sentenence fragments/parts:
+   */
+  static #getSentenceFrags(inputText) {
+    return inputText.toLowerCase()
       .replace(/@#\$%\^&\*\(\)_\+=~`\{\[\}\]\|:;<>\/\\\t/g, ' ')
       .replace(/\s+-+\s+/g, '.')
       .replace(/\s*[,.?!;]+\s*/g, '.')
       .replace(/\s*\bbut\b\s*/g, '.')
-      .replace(/\s{2,}/g, ' ');
+      .replace(/\s{2,}/g, ' ')
+      .split('.')
+      .map((t) => t.trim())
+      .filter(Boolean);
+  }
 
-    // split text in part sentences and loop through them
-    const parts = inputText.split('.');
+  getReply(inputText) {
+    const parts = ElizaBot.#getSentenceFrags(inputText);
+
+    // check for quit expression
+    this.quit = parts.length === 1 && langConfig.quitCommands.includes(parts[0]);
+    if (this.quit) {
+      return this.getFarewell();
+    }
+
     let reply = '';
     for (let i = 0; i < parts.length; i++) {
       let part = parts[i];
-      if (part === '') {
-        // eslint-disable-next-line no-continue
-        continue;
-      }
-
-      // check for quit expression
-      if (langConfig.quitCommands.includes(part)) {
-        this.quit = true;
-        return this.getFarewell();
-      }
 
       part = this.#elizaPres.doSubstitutions(part);
       this.sentence = part;
