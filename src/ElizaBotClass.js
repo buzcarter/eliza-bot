@@ -200,20 +200,16 @@ class ElizaBot {
       }
     }
 
-    // nothing matched try mem
-    reply = this.#elizaMemory.get();
+    // Nothing matched? Try mem. Nothing in mem? get "no match"
+    reply = this.#elizaMemory.get() || this.getNoMatchReply();
 
-    // if nothing in mem so try xnone
-    if (reply === '') {
-      this.sentence = ' ';
-      const index = this.#getRuleIndexByKey(NO_MATCH_KEYWORD);
-      if (index >= 0) {
-        reply = this.#execRule(index);
-      }
-    }
-
-    // return reply or default string
     return reply || 'I am at a loss for words.';
+  }
+
+  getNoMatchReply() {
+    this.sentence = ' ';
+    const index = this.#getRuleIndexByKey(NO_MATCH_KEYWORD);
+    return index >= 0 ? this.#execRule(index) : '';
   }
 
   #getNextResponse(keywordIndex, phraseIndex, responses) {
