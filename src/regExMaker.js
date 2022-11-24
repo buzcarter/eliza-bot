@@ -10,7 +10,7 @@ const regExes = {
   USE_SYNONYM: /@(\S+)/g,
 
   /** Inline "*", finds "`u *r`" within "`* do you *remember *`" */
-  INLINE_WILDCARD: /(\S)\s*\*\s*(\S)/g,
+  INLINE_WILDCARD: /(\S)\s*\*\s*(\S)/,
 
   /** Starts with a wildcard, finds "`* a`" within "`* are you *`" */
   STARTS_WITH_WILDCARD: /^\s*\*\s*(\S)/,
@@ -46,24 +46,24 @@ function endsWithWildcard(regEx) {
     : regEx;
 }
 
+/**
+ * @example
+ * const value = '* i * you *';
+ * const result = inlineWildcards(value);
+ * // result is: '* i\\b\\s*(.*)\\s*\\byou *'
+ */
 function inlineWildcards(regEx) {
   if (!regExes.INLINE_WILDCARD.test(regEx)) {
     return regEx;
   }
 
-  const z = /(\S)\s*\*\s*(\S)/;
+  const globalRegEx = new RegExp(regExes.INLINE_WILDCARD, 'g');
+  return regEx.replace(globalRegEx, (phrase) => {
+    const [, firstChar, lastChar] = phrase.match(regExes.INLINE_WILDCARD);
+    const firstBoundary = firstChar !== ')' ? RegExStr.BOUNDARY : '';
+    const lastBoundary = ((lastChar !== '(') && (lastChar !== '\\')) ? RegExStr.BOUNDARY : '';
 
-  return regEx.replace(regExes.INLINE_WILDCARD, (phrase) => {
-    let [, firstChar, lastChar] = phrase.match(z);
-    if (firstChar !== ')') {
-      firstChar += RegExStr.BOUNDARY;
-    }
-
-    if ((lastChar !== '(') && (lastChar !== '\\')) {
-      lastChar = RegExStr.BOUNDARY + lastChar;
-    }
-
-    return `${firstChar}${RegExStr.WILDCARD}${lastChar}`;
+    return `${firstChar}${firstBoundary}${RegExStr.WILDCARD}${lastBoundary}${lastChar}`;
   });
 }
 
@@ -74,30 +74,36 @@ function startsWithWildcard(regEx) {
     : regEx;
 }
 
+function expandSynonyms(regEx) {
+  return regExes.USE_SYNONYM.test(regEx)
+    ? regEx.replace(regExes.USE_SYNONYM, (match, word) => synPatternHash[word] || word)
+    : regEx;
+}
+
 function make(pattern) {
   let useMemFlag = false;
   let regEx = `${pattern || ''}`;
+
+  if (regExes.WILDCARD.test(regEx)) {
+    return {
+      regEx: RegExStr.WILDCARD,
+      useMemFlag,
+    };
+  }
 
   if (regExes.BEGINS_WITH_MEM_FLAG.test(regEx)) {
     regEx = regEx.replace(regExes.BEGINS_WITH_MEM_FLAG, '');
     useMemFlag = true;
   }
 
-  // expand synonyms
-  if (regExes.USE_SYNONYM.test(regEx)) {
-    regEx = regEx.replace(regExes.USE_SYNONYM, (match, word) => synPatternHash[word] || word);
-  }
+  regEx = expandSynonyms(regEx);
 
   // expand `*` (wildcard) expressions
-  if (regExes.WILDCARD.test(regEx)) {
-    regEx = RegExStr.WILDCARD;
-  } else {
-    regEx = inlineWildcards(regEx);
-    regEx = startsWithWildcard(regEx);
-    regEx = endsWithWildcard(regEx);
-  }
+  regEx = inlineWildcards(regEx);
+  regEx = startsWithWildcard(regEx);
+  regEx = endsWithWildcard(regEx);
 
-  // expand white space
+  // expand remaining white spaces
   regEx = regEx.replace(regExes.WHITESPACE, '\\s+');
 
   return {

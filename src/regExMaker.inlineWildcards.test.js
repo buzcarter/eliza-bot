@@ -53,8 +53,8 @@ describe('regExMaker', () => {
       value: '* was you *',
       expectedResult: '* was you *',
     }, {
-      value: '* i (desire|want|need) *',
-      expectedResult: '* i (desire|want|need) *',
+      value: '* i smell* (desire|want|need) *',
+      expectedResult: '* i smell\\b\\s*(.*)\\s*(desire|want|need) *',
     }, {
       value: '* i am* (sad|unhappy|depressed|sick) *',
       expectedResult: '* i am\\b\\s*(.*)\\s*(sad|unhappy|depressed|sick) *',
@@ -86,8 +86,8 @@ describe('regExMaker', () => {
       value: '* i * you *',
       expectedResult: '* i\\b\\s*(.*)\\s*\\byou *',
     }, {
-      value: '* you remind me of *',
-      expectedResult: '* you remind me of *',
+      value: '* (you|pie) * remind * (me|cake) of *',
+      expectedResult: '* (you|pie)\\s*(.*)\\s*\\bremind\\b\\s*(.*)\\s*(me|cake) of *',
     }, {
       value: '* you are *',
       expectedResult: '* you are *',
