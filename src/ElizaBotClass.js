@@ -235,36 +235,14 @@ class ElizaBot {
   }
 
   #substitutePositionalParams(m, reply) {
-    const testValue = this.#substitutePositionalParams6(m, reply);
-    const paramRegEx = /\(([0-9]+)\)/;
-    let matches = paramRegEx.exec(reply);
-    if (!matches) {
-      return reply;
-    }
-
-    let result = '';
-    let remainder = reply;
-    while (matches) {
-      const [matchedText, matcheParmNbr] = matches;
-      let param = m[parseInt(matcheParmNbr, 10)];
-      param = this.#elizaPosts.doSubstitutions(param);
-      result += remainder.substring(0, matches.index) + param;
-      remainder = remainder.substring(matches.index + matchedText.length);
-      matches = paramRegEx.exec(remainder);
-    }
-    console.log(testValue, '***', result + remainder);
-    return result + remainder;
-  }
-
-  #substitutePositionalParams6(m, reply) {
     const paramRegEx = /\(([0-9]+)\)/g;
     if (!paramRegEx.test(reply)) {
       return reply;
     }
 
     return reply.replace(paramRegEx, (match, matcheParmNbr) => {
-      const param = m[parseInt(matcheParmNbr, 10)];
-      return this.#elizaPosts.doSubstitutions(param);
+      const phrase = m[parseInt(matcheParmNbr, 10)];
+      return this.#elizaPosts.doSubstitutions(phrase);
     });
   }
 
