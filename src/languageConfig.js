@@ -653,9 +653,9 @@ const keywords = [{
   weight: 2,
   originalIndex: -1,
   phrases: [{
-    pattern: '$ * my *',
+    pattern: '* my *',
     regEx: null,
-    useMemFlag: false,
+    useMemFlag: true,
     responses: [
       'Does that have anything to do with the fact that your (2) ?',
       'Lets discuss further why your (2).',

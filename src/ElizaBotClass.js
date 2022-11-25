@@ -126,11 +126,9 @@ class ElizaBot {
       // save original index for sorting
       keywordEntry.originalIndex = k;
       keywordEntry.phrases.forEach((thisPhrase) => {
-        const { regEx, useMemFlag } = regExMaker.make(thisPhrase.pattern);
-
         Object.assign(thisPhrase, {
-          regEx,
-          useMemFlag,
+          regEx: regExMaker.make(thisPhrase.pattern),
+          useMemFlag: thisPhrase.useMemFlag === true,
         });
       });
     });
@@ -229,6 +227,20 @@ class ElizaBot {
     return responses[index];
   }
 
+  /**
+   * Replaces placeholders within `reply` with corresponding values from `m`
+   * @param {[string]} m
+   * @param {string} reply
+   * @returns {string}
+   * @example
+   * const m = ['I like thanksgiving turkeys', 'thanksgiving']
+   * const reply = #substitutePositionalParams(m, "Do you say (1) for some special reason ?");
+   * // reply is "Do you say thanksgiving for some special reason ?"
+   *
+   * const m = ['my cake tastes sad', 'cake', 'cake tastes sad']
+   * const reply = #substitutePositionalParams(m, "Lets discuss further why your (2).");
+   * // reply is "Lets discuss further why your cake tastes sad."
+   */
   #substitutePositionalParams(m, reply) {
     const paramRegEx = /\(([0-9]+)\)/g;
     if (!paramRegEx.test(reply)) {

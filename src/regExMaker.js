@@ -23,8 +23,6 @@ const regExes = {
 
   /** One or more spaces (anywhere) */
   WHITESPACE: /\s+/g,
-
-  BEGINS_WITH_MEM_FLAG: /^\$\s*/,
 };
 
 const synPatternHash = {};
@@ -81,19 +79,10 @@ function expandSynonyms(regEx) {
 }
 
 function make(pattern) {
-  let useMemFlag = false;
   let regEx = `${pattern || ''}`;
 
   if (regExes.WILDCARD.test(regEx)) {
-    return {
-      regEx: RegExStr.WILDCARD,
-      useMemFlag,
-    };
-  }
-
-  if (regExes.BEGINS_WITH_MEM_FLAG.test(regEx)) {
-    regEx = regEx.replace(regExes.BEGINS_WITH_MEM_FLAG, '');
-    useMemFlag = true;
+    return RegExStr.WILDCARD;
   }
 
   regEx = expandSynonyms(regEx);
@@ -106,10 +95,7 @@ function make(pattern) {
   // expand remaining white spaces
   regEx = regEx.replace(regExes.WHITESPACE, '\\s+');
 
-  return {
-    regEx,
-    useMemFlag,
-  };
+  return regEx;
 }
 
 module.exports = {
