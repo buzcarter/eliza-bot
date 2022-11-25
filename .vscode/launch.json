@@ -5,6 +5,7 @@
     "request": "launch",
     "type": "node",
     "program": "${workspaceRoot}/index.js",
+    "console": "integratedTerminal",
     "args": []
   }, {
     "name": "Jest",

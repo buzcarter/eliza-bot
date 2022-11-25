@@ -234,12 +234,45 @@ class ElizaBot {
     return responses[index];
   }
 
+  #substitutePositionalParams(m, reply) {
+    const testValue = this.#substitutePositionalParams6(m, reply);
+    const paramRegEx = /\(([0-9]+)\)/;
+    let matches = paramRegEx.exec(reply);
+    if (!matches) {
+      return reply;
+    }
+
+    let result = '';
+    let remainder = reply;
+    while (matches) {
+      const [matchedText, matcheParmNbr] = matches;
+      let param = m[parseInt(matcheParmNbr, 10)];
+      param = this.#elizaPosts.doSubstitutions(param);
+      result += remainder.substring(0, matches.index) + param;
+      remainder = remainder.substring(matches.index + matchedText.length);
+      matches = paramRegEx.exec(remainder);
+    }
+    console.log(testValue, '***', result + remainder);
+    return result + remainder;
+  }
+
+  #substitutePositionalParams6(m, reply) {
+    const paramRegEx = /\(([0-9]+)\)/g;
+    if (!paramRegEx.test(reply)) {
+      return reply;
+    }
+
+    return reply.replace(paramRegEx, (match, matcheParmNbr) => {
+      const param = m[parseInt(matcheParmNbr, 10)];
+      return this.#elizaPosts.doSubstitutions(param);
+    });
+  }
+
   /**
    * @param {int} keywordIdx
    * @returns {string} statement
    */
   #execRule(keywordIdx) {
-    const paramRegEx = /\(([0-9]+)\)/;
     const { keyword, phrases, weight } = this.keywordsList[keywordIdx];
     for (let phraseIndex = 0; phraseIndex < phrases.length; phraseIndex++) {
       const thisPhrase = phrases[phraseIndex];
@@ -258,21 +291,7 @@ class ElizaBot {
           return this.#execRule(index > -1 ? index : this.#getRuleIndexByKey(NO_MATCH_KEYWORD));
         }
 
-        // substitute positional params
-        let posParamMatches = paramRegEx.exec(reply);
-        if (posParamMatches) {
-          let leftPart = '';
-          let rightPart = reply;
-          while (posParamMatches) {
-            let param = m[parseInt(posParamMatches[1], 10)];
-            param = this.#elizaPosts.doSubstitutions(param);
-            leftPart += rightPart.substring(0, posParamMatches.index) + param;
-            rightPart = rightPart.substring(posParamMatches.index + posParamMatches[0].length);
-            posParamMatches = paramRegEx.exec(rightPart);
-          }
-          reply = leftPart + rightPart;
-        }
-
+        reply = this.#substitutePositionalParams(m, reply);
         reply = this.#postTransform(reply);
         if (useMemFlag) {
           this.#elizaMemory.save(reply);
