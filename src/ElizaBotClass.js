@@ -173,15 +173,7 @@ class ElizaBot {
       .filter(Boolean);
   }
 
-  getReply(inputText) {
-    const parts = ElizaBot.#getSentenceFrags(inputText);
-
-    // check for quit expression
-    this.quit = parts.length === 1 && langConfig.quitCommands.includes(parts[0]);
-    if (this.quit) {
-      return this.getFarewell();
-    }
-
+  #checkKeywordsReply(parts) {
     let reply = '';
     for (let i = 0; i < parts.length; i++) {
       let part = parts[i];
@@ -200,10 +192,26 @@ class ElizaBot {
       }
     }
 
-    // Nothing matched? Try mem. Nothing in mem? get "no match"
-    reply = this.#elizaMemory.get() || this.getNoMatchReply();
+    return reply;
+  }
 
-    return reply || 'I am at a loss for words.';
+  getReply(inputText) {
+    const parts = ElizaBot.#getSentenceFrags(inputText);
+
+    // check for quit expression
+    this.quit = parts.length === 1 && langConfig.quitCommands.includes(parts[0]);
+    if (this.quit) {
+      return this.getFarewell();
+    }
+
+    // Make reply based on Keyword.
+    // Nothing matched? Try memory.
+    // Nothing in memory? Get "no match".
+    // Ugh?! Still nothing? Say hardcoded response.
+    return this.#checkKeywordsReply(parts)
+      || this.#elizaMemory.get()
+      || this.getNoMatchReply()
+      || 'I am at a loss for words.';
   }
 
   getNoMatchReply() {
