@@ -28,8 +28,6 @@ class ElizaBot {
   /** 2-Dimensional array of last {responseIndex} `[{keywordIndex}][{phraseIndex}]` */
   lastchoice = [];
 
-  sentence = '';
-
   #elizaMemory = false;
 
   #dataParsed = false;
@@ -177,13 +175,10 @@ class ElizaBot {
     let reply = '';
 
     parts.some((part) => {
-      // eslint-disable-next-line no-param-reassign
-      part = this.#elizaPres.doSubstitutions(part);
-      this.sentence = part;
-
+      const sentence = this.#elizaPres.doSubstitutions(part);
       return this.keywordsList.some(({ keyword }, keywordIdx) => {
-        if (part.search(new RegExp(`\\b${keyword}\\b`, 'i')) >= 0) {
-          reply = this.#execRule(keywordIdx);
+        if (sentence.search(new RegExp(`\\b${keyword}\\b`, 'i')) >= 0) {
+          reply = this.#execRule(sentence, keywordIdx);
         }
         return reply;
       });
@@ -212,9 +207,9 @@ class ElizaBot {
   }
 
   getNoMatchReply() {
-    this.sentence = ' ';
-    const index = this.#getRuleIndexByKey(NO_MATCH_KEYWORD);
-    return index >= 0 ? this.#execRule(index) : '';
+    const sentence = ' ';
+    const keywordIdx = this.#getRuleIndexByKey(NO_MATCH_KEYWORD);
+    return keywordIdx >= 0 ? this.#execRule(sentence, keywordIdx) : '';
   }
 
   #getNextResponse(keywordIndex, phraseIndex, responses) {
@@ -250,35 +245,40 @@ class ElizaBot {
    * @param {int} keywordIdx
    * @returns {string} statement
    */
-  #execRule(keywordIdx) {
+  #execRule(sentence, keywordIdx) {
     const { keyword, phrases, weight } = this.keywordsList[keywordIdx];
-    for (let phraseIndex = 0; phraseIndex < phrases.length; phraseIndex++) {
-      const thisPhrase = phrases[phraseIndex];
-      const m = this.sentence.match(thisPhrase.regEx);
-      if (m !== null) {
-        const { responses, useMemFlag } = thisPhrase;
 
-        let reply = this.#getNextResponse(keywordIdx, phraseIndex, responses);
-        if (this.#debugEnabled) {
-          // eslint-disable-next-line no-console
-          console.log(`execRule match:\n  key: ${keyword}\n  weight: ${weight}\n  pattern: ${thisPhrase.pattern}\n  regEx: ${thisPhrase.regEx}\n  reasmb: ${reply}\n  useMemFlag: ${useMemFlag}`);
-        }
+    let reply = '';
 
-        if (reply.goto) {
-          const index = this.#getRuleIndexByKey(reply.goto);
-          return this.#execRule(index > -1 ? index : this.#getRuleIndexByKey(NO_MATCH_KEYWORD));
-        }
-
-        reply = this.#substitutePositionalParams(m, reply);
-        reply = this.#postTransform(reply);
-        if (useMemFlag) {
-          this.#elizaMemory.save(reply);
-        } else {
-          return reply;
-        }
+    phrases.some((phrase, phraseIdx) => {
+      const matches = sentence.match(phrase.regEx);
+      if (!matches) {
+        return false;
       }
-    }
-    return '';
+
+      reply = this.#getNextResponse(keywordIdx, phraseIdx, phrase.responses);
+      if (this.#debugEnabled) {
+        // eslint-disable-next-line no-console
+        console.log(`execRule match:\n  key: ${keyword}\n  weight: ${weight}\n  pattern: ${phrase.pattern}\n  regEx: ${phrase.regEx}\n  reasmb: ${reply}\n  useMemFlag: ${phrase.useMemFlag}`);
+      }
+
+      if (reply.goto) {
+        const gotoIdx = this.#getRuleIndexByKey(reply.goto);
+        reply = gotoIdx > -1 ? this.#execRule(sentence, gotoIdx) : this.getNoMatchReply();
+        return true;
+      }
+
+      reply = this.#substitutePositionalParams(matches, reply);
+      reply = this.#postTransform(reply);
+      if (phrase.useMemFlag) {
+        this.#elizaMemory.save(reply);
+        return false;
+      }
+
+      return true;
+    });
+
+    return reply;
   }
 
   /* eslint-disable no-param-reassign */
