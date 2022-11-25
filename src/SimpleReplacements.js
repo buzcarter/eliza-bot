@@ -26,6 +26,10 @@ class SimpleReplacements {
     this.#regEx = new RegExp(`\\b(${values.join('|')})\\b`, 'g');
   }
 
+  /**
+   * @param {string} phrase
+   * @returns {string}
+   */
   doSubstitutions(phrase) {
     return `${phrase}`.replace(this.#regEx, (match) => this.#wordSubs[match]);
   }

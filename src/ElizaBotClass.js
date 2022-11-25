@@ -26,7 +26,7 @@ class ElizaBot {
   /** 2-Dimensional array of last {responseIndex} `[{keywordIndex}][{phraseIndex}]` */
   lastchoice = [];
 
-  #elizaMemory = false;
+  #memory = false;
 
   #dataParsed = false;
 
@@ -35,13 +35,13 @@ class ElizaBot {
    * This is where all the ``I'''s and ``you'''s are exchanged.
    * @type SimpleReplacements
    */
-  #elizaPosts = null;
+  #replyPositionalSubstitutions = null;
 
   /**
    * Applied to user-input text, BEFORE any processing, and before a reassebly statement has been selected.
    * @type SimpleReplacements
    */
-  #elizaPres = null;
+  #inputPreSubstitutions = null;
 
   /**
    * @param {object} opts
@@ -59,7 +59,7 @@ class ElizaBot {
 
     this.version = '1.1 (original)';
 
-    this.#elizaMemory = new ElizaMemory(opts);
+    this.#memory = new ElizaMemory(opts);
     this.#dataParsed = false;
     if (!this.#dataParsed) {
       this.#init();
@@ -70,7 +70,7 @@ class ElizaBot {
 
   reset() {
     this.quit = false;
-    this.#elizaMemory.reset();
+    this.#memory.reset();
     this.lastchoice = [];
 
     for (let keywordIndex = 0; keywordIndex < this.keywordsList.length; keywordIndex++) {
@@ -86,8 +86,8 @@ class ElizaBot {
     this.#expandKeywords();
 
     // and compose regexps and refs for pres and posts
-    this.#elizaPosts = new SimpleReplacements(langConfig.post);
-    this.#elizaPres = new SimpleReplacements(langConfig.pres);
+    this.#replyPositionalSubstitutions = new SimpleReplacements(langConfig.post);
+    this.#inputPreSubstitutions = new SimpleReplacements(langConfig.pres);
 
     // check for langConfig.quitCommands and install default if missing
     if (!Array.isArray(langConfig.quitCommands)) {
@@ -178,7 +178,7 @@ class ElizaBot {
     let reply = '';
 
     parts.some((part) => {
-      const sentence = this.#elizaPres.doSubstitutions(part);
+      const sentence = this.#inputPreSubstitutions.doSubstitutions(part);
       return this.keywordsList.some(({ keyword }, keywordIdx) => {
         if (sentence.search(new RegExp(`\\b${keyword}\\b`, 'i')) >= 0) {
           reply = this.#execRule(sentence, keywordIdx);
@@ -204,7 +204,7 @@ class ElizaBot {
     // Nothing in memory? Get "no match" response.
     // Ugh?! Still nothing? Use a hardcoded reply.
     return this.#checkKeywordsReply(parts)
-      || this.#elizaMemory.get()
+      || this.#memory.get()
       || this.getNoMatchReply()
       || 'I am at a loss for words.';
   }
@@ -234,27 +234,27 @@ class ElizaBot {
 
   /**
    * Replaces placeholders within `reply` with corresponding values from `m`
-   * @param {[string]} m
+   * @param {[string]} patternMatches
    * @param {string} reply
    * @returns {string}
    * @example
-   * const m = ['I like thanksgiving turkeys', 'thanksgiving']
-   * const reply = #substitutePositionalParams(m, "Do you say (1) for some special reason ?");
+   * const matches = ['I like thanksgiving turkeys', 'thanksgiving']
+   * const reply = #substitutePositionalParams(matches, "Do you say (1) for some special reason ?");
    * // reply is "Do you say thanksgiving for some special reason ?"
    *
-   * const m = ['my cake tastes sad', 'cake', 'cake tastes sad']
-   * const reply = #substitutePositionalParams(m, "Lets discuss further why your (2).");
+   * const matches = ['my cake tastes sad', 'cake', 'cake tastes sad']
+   * const reply = #substitutePositionalParams(matches, "Lets discuss further why your (2).");
    * // reply is "Lets discuss further why your cake tastes sad."
    */
-  #substitutePositionalParams(m, reply) {
-    const paramRegEx = /\(([0-9]+)\)/g;
-    if (!paramRegEx.test(reply)) {
+  #substitutePositionalParams(patternMatches, reply) {
+    const paramNbrRegEx = /\(([0-9]+)\)/g;
+    if (!paramNbrRegEx.test(reply)) {
       return reply;
     }
 
-    return reply.replace(paramRegEx, (match, matcheParmNbr) => {
-      const phrase = m[parseInt(matcheParmNbr, 10)];
-      return this.#elizaPosts.doSubstitutions(phrase);
+    return reply.replace(paramNbrRegEx, (match, paramNbr) => {
+      const phrase = patternMatches[parseInt(paramNbr, 10)];
+      return this.#replyPositionalSubstitutions.doSubstitutions(phrase);
     });
   }
 
@@ -288,7 +288,7 @@ class ElizaBot {
       reply = this.#substitutePositionalParams(matches, reply);
       reply = this.#finalizeReply(reply);
       if (phrase.saveForLater) {
-        this.#elizaMemory.save(reply);
+        this.#memory.save(reply);
         return false;
       }
 
