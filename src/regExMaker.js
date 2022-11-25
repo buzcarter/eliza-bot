@@ -72,6 +72,8 @@ function startsWithWildcard(regEx) {
     : regEx;
 }
 
+const expandWhitespace = (regEx) => regEx.replace(regExes.WHITESPACE, '\\s+');
+
 function expandSynonyms(regEx) {
   return regExes.USE_SYNONYM.test(regEx)
     ? regEx.replace(regExes.USE_SYNONYM, (match, word) => synPatternHash[word] || word)
@@ -86,14 +88,10 @@ function make(pattern) {
   }
 
   regEx = expandSynonyms(regEx);
-
-  // expand `*` (wildcard) expressions
   regEx = inlineWildcards(regEx);
   regEx = startsWithWildcard(regEx);
   regEx = endsWithWildcard(regEx);
-
-  // expand remaining white spaces
-  regEx = regEx.replace(regExes.WHITESPACE, '\\s+');
+  regEx = expandWhitespace(regEx);
 
   return regEx;
 }

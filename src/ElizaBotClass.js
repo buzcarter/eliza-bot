@@ -21,8 +21,6 @@ class ElizaBot {
 
   keywordsList = null;
 
-  postsHash = null;
-
   postTransformsList = null;
 
   /** 2-Dimensional array of last {responseIndex} `[{keywordIndex}][{phraseIndex}]` */
@@ -53,7 +51,6 @@ class ElizaBot {
   constructor(opts) {
     this.keywordsList = langConfig.keywords;
     this.postTransformsList = langConfig.postTransforms;
-    this.postsHash = langConfig.post;
 
     const { debugEnabled, noRandom } = opts || {};
     this.#noRandomResponsesEnabled = Boolean(noRandom);
@@ -101,7 +98,15 @@ class ElizaBot {
     this.#dataParsed = true;
   }
 
-  /** parse data and convert it from canonical form to internal use */
+  /**
+   * Parse langConfig data and convert it from canonical form to internal use
+   *
+   * ### Adds:
+   *
+   * * `keyword.originalIndex`
+   * * `phrase.regEx`
+   * * defaults `phrase.saveForLater` to false if not set in data;
+   */
   #expandKeywords() {
     // check for keywords or install empty structure to prevent any errors
     if (!Array.isArray(this.keywordsList) || !this.keywordsList.length) {
@@ -112,7 +117,7 @@ class ElizaBot {
         phrases: [{
           pattern: '###',
           regEx: null,
-          useMemFlag: false,
+          saveForLater: false,
           responses: [],
         }],
       }];
@@ -128,7 +133,7 @@ class ElizaBot {
       keywordEntry.phrases.forEach((thisPhrase) => {
         Object.assign(thisPhrase, {
           regEx: regExMaker.make(thisPhrase.pattern),
-          useMemFlag: thisPhrase.useMemFlag === true,
+          saveForLater: thisPhrase.saveForLater === true,
         });
       });
     });
@@ -271,7 +276,7 @@ class ElizaBot {
       reply = this.#getNextResponse(keywordIdx, phraseIdx, phrase.responses);
       if (this.#debugEnabled) {
         // eslint-disable-next-line no-console
-        console.log(`execRule match:\n  key: ${keyword}\n  weight: ${weight}\n  pattern: ${phrase.pattern}\n  regEx: ${phrase.regEx}\n  reasmb: ${reply}\n  useMemFlag: ${phrase.useMemFlag}`);
+        console.log(`execRule match:\n  key: ${keyword}\n  weight: ${weight}\n  pattern: ${phrase.pattern}\n  regEx: ${phrase.regEx}\n  reasmb: ${reply}\n  saveForLater: ${phrase.saveForLater}`);
       }
 
       if (reply.applyKeyword) {
@@ -281,8 +286,8 @@ class ElizaBot {
       }
 
       reply = this.#substitutePositionalParams(matches, reply);
-      reply = this.#postTransform(reply);
-      if (phrase.useMemFlag) {
+      reply = this.#finalizeReply(reply);
+      if (phrase.saveForLater) {
         this.#elizaMemory.save(reply);
         return false;
       }
@@ -294,11 +299,13 @@ class ElizaBot {
   }
 
   /* eslint-disable no-param-reassign */
-  #postTransform(text) {
-    // final cleanings
+  /**
+   * Compact and apply `postTransformsList` substitutions. This is the last tidy-up performed before sending reply to user.
+   */
+  #finalizeReply(text) {
     text = text
       .replace(/\s{2,}/g, ' ')
-      .replace(/\s+\./g, '.');
+      .replace(/\s+([.?!])/g, '$1');
 
     if (Array.isArray(this.postTransformsList)) {
       this.postTransformsList.forEach(({ pattern, replacement }) => {

@@ -2,7 +2,7 @@
 const NO_MATCH_KEYWORD = 'xnone';
 
 const greetings = [
-  'How do you do.  Please tell me your problem.',
+  'How do you do. Please tell me your problem.',
   "Please tell me what's been bothering you.",
   'Is something troubling you ?',
   'Im here. Talk to me.',
@@ -14,11 +14,8 @@ const greetings = [
 const keywords = [{
   keyword: NO_MATCH_KEYWORD,
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       "I'm not sure I understand you fully.",
       'Please go on.',
@@ -41,11 +38,8 @@ const keywords = [{
 }, {
   keyword: 'sorry',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       "Please don't apologize.",
       'Apologies are not necessary.',
@@ -58,11 +52,8 @@ const keywords = [{
 }, {
   keyword: 'apologize',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'sorry' },
     ],
@@ -70,11 +61,8 @@ const keywords = [{
 }, {
   keyword: 'remember',
   weight: 5,
-  originalIndex: -1,
   phrases: [{
     pattern: '* i remember *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Do you often think of (2) ?',
       'Does thinking of (2) bring anything else to mind ?',
@@ -86,8 +74,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* do you remember *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Did you think I would forget (2) ?',
       'Why do you think I should recall (2) now ?',
@@ -97,8 +83,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* you remember *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'How could I forget (2) ?',
       'What about (2) should I remember ?',
@@ -108,11 +92,8 @@ const keywords = [{
 }, {
   keyword: 'forget',
   weight: 5,
-  originalIndex: -1,
   phrases: [{
     pattern: '* i forget *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Can you think of why you might forget (2) ?',
       "Why can't you remember (2) ?",
@@ -124,8 +105,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* did you forget *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Why do you ask ?',
       'Are you sure you told me ?',
@@ -138,11 +117,8 @@ const keywords = [{
 }, {
   keyword: 'if',
   weight: 3,
-  originalIndex: -1,
   phrases: [{
     pattern: '* if *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       "Do you think it's likely that (2) ?",
       'Do you wish that (2) ?',
@@ -156,11 +132,8 @@ const keywords = [{
 }, {
   keyword: 'dreamed',
   weight: 4,
-  originalIndex: -1,
   phrases: [{
     pattern: '* i dreamed *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Really, (2) ?',
       'Have you ever fantasized (2) while you were awake ?',
@@ -171,11 +144,8 @@ const keywords = [{
 }, {
   keyword: 'dream',
   weight: 3,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'What does that dream suggest to you ?',
       'Do you dream often ?',
@@ -186,11 +156,8 @@ const keywords = [{
 }, {
   keyword: 'perhaps',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       "You don't seem quite certain.",
       'Why the uncertain tone ?',
@@ -203,11 +170,8 @@ const keywords = [{
 }, {
   keyword: 'name',
   weight: 15,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'I am not interested in names.',
       'OK, my name is bweezy. What do you need to know ?',
@@ -217,11 +181,8 @@ const keywords = [{
 }, {
   keyword: 'deutsch',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Sorry I do not sprechen sie deutsch',
       "I told you before, I don't understand German.",
@@ -231,11 +192,8 @@ const keywords = [{
 }, {
   keyword: 'francais',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Why? Do you love to go to France?',
       "I told you before, I don't understand French.",
@@ -245,11 +203,8 @@ const keywords = [{
 }, {
   keyword: 'italiano',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Have you been to Rome?',
       "I told you before, I don't understand Italian.",
@@ -259,11 +214,8 @@ const keywords = [{
 }, {
   keyword: 'espanol',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Sorry I do not speak Spanish',
       "I told you before, I don't understand Spanish.",
@@ -273,11 +225,8 @@ const keywords = [{
 }, {
   keyword: 'xforeign',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'I speak only English.',
     ],
@@ -285,11 +234,8 @@ const keywords = [{
 }, {
   keyword: 'hello',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'How do you do.  Please state your problem.',
       'Hi.  What seems to be your problem ?',
@@ -298,11 +244,8 @@ const keywords = [{
 }, {
   keyword: 'computer',
   weight: 50,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Do computers worry you ?',
       'Why do you mention computers ?',
@@ -316,11 +259,8 @@ const keywords = [{
 }, {
   keyword: 'am',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '* am i *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Do you believe you are (2) ?',
       'Would you want to be (2) ?',
@@ -330,15 +270,11 @@ const keywords = [{
     ],
   }, {
     pattern: '* i am *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'i' },
     ],
   }, {
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       "Why do you say 'am' ?",
       "I don't understand that.",
@@ -347,11 +283,8 @@ const keywords = [{
 }, {
   keyword: 'are',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '* are you *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Why are you interested in whether I am (2) or not ?',
       "Would you prefer if I weren't (2) ?",
@@ -363,15 +296,11 @@ const keywords = [{
     ],
   }, {
     pattern: '* you are *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'you' },
     ],
   }, {
     pattern: '* are *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Did you think they might not be (2) ?',
       'Would you like it if they were not (2) ?',
@@ -384,11 +313,8 @@ const keywords = [{
 }, {
   keyword: 'your',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '* your *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Why are you concerned over my (2) ?',
       'What about your own (2) ?',
@@ -401,11 +327,8 @@ const keywords = [{
 }, {
   keyword: 'was',
   weight: 2,
-  originalIndex: -1,
   phrases: [{
     pattern: '* was i *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'What if you were (2) ?',
       'Do you think you were (2) ?',
@@ -416,8 +339,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* i was *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Were you really ?',
       'Why do you tell me you were (2) now ?',
@@ -425,8 +346,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* was you *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Would you like to believe I was (2) ?',
       'What suggests that I was (2) ?',
@@ -438,11 +357,8 @@ const keywords = [{
 }, {
   keyword: 'i',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '* i @desire *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'What would it mean to you if you got (3) ?',
       'Why do you want (3) ?',
@@ -453,8 +369,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* i am* @sad *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'I am sorry to hear that you are (3).',
       'Do you think coming here will help you not to be (3) ?',
@@ -462,8 +376,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* i am* @happy *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'How have I helped you to be (3) ?',
       'Has your treatment made you (3) ?',
@@ -472,15 +384,11 @@ const keywords = [{
     ],
   }, {
     pattern: '* i was *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'was' },
     ],
   }, {
     pattern: '* i @belief i *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Do you really think so ?',
       'But you are not sure you (3).',
@@ -488,15 +396,11 @@ const keywords = [{
     ],
   }, {
     pattern: '* i* @belief *you *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'you' },
     ],
   }, {
     pattern: '* i am *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Is it because you are (2) that you came to me ?',
       'How long have you been (2) ?',
@@ -509,8 +413,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* i @cannot *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       "How do you know that you can't (3) ?",
       'Have you tried ?',
@@ -520,8 +422,6 @@ const keywords = [{
     ],
   }, {
     pattern: "* i don't *",
-    regEx: null,
-    useMemFlag: false,
     responses: [
       "Don't you really (2) ?",
       "Why don't you (2) ?",
@@ -530,8 +430,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* i feel *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Tell me more about such feelings.',
       'Do you often feel (2) ?',
@@ -540,8 +438,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* i * you *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Perhaps in your fantasies we (2) each other.',
       'Do you wish to (2) me ?',
@@ -550,8 +446,6 @@ const keywords = [{
     ],
   }, {
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'You say (1) ?',
       'Can you elaborate on that ?',
@@ -563,18 +457,13 @@ const keywords = [{
 }, {
   keyword: 'you',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '* you remind me of *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'alike' },
     ],
   }, {
     pattern: '* you are *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'What makes you think I am (2) ?',
       'Does it please you to believe I am (2) ?',
@@ -583,8 +472,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* you* me *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Why do you think I (2) you ?',
       "You like to think I (2) you -- don't you ?",
@@ -596,8 +483,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* you *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'We were discussing you -- not me.',
       'Oh, I (2) ?',
@@ -608,11 +493,8 @@ const keywords = [{
 }, {
   keyword: 'yes',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'You seem to be quite positive.',
       'You are sure.',
@@ -623,11 +505,8 @@ const keywords = [{
 }, {
   keyword: 'no',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '* no one *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Are you sure, no one (2) ?',
       'Surely someone (2) .',
@@ -639,8 +518,6 @@ const keywords = [{
     ],
   }, {
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Are you saying no just to be negative?',
       'You are being a bit negative.',
@@ -651,11 +528,9 @@ const keywords = [{
 }, {
   keyword: 'my',
   weight: 2,
-  originalIndex: -1,
   phrases: [{
     pattern: '* my *',
-    regEx: null,
-    useMemFlag: true,
+    saveForLater: true,
     responses: [
       'Does that have anything to do with the fact that your (2) ?',
       'Lets discuss further why your (2).',
@@ -664,8 +539,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* my* @family *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Tell me more about your family.',
       'Who else in your family (4) ?',
@@ -674,12 +547,10 @@ const keywords = [{
     ],
   }, {
     pattern: '* my *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Your (2) ?',
       'Why do you say your (2) ?',
-      'Do you like your (2) ',
+      'Do you like your (2) ?',
       'Do you have more than 1 (2) ?',
       'Does that suggest anything else which belongs to you ?',
       'Is it important to you that you have your (2) ?',
@@ -688,11 +559,8 @@ const keywords = [{
 }, {
   keyword: 'can',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '* can you *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       "You believe I can (2) don't you ?",
       'You want me to be able to (2).',
@@ -701,8 +569,6 @@ const keywords = [{
     ],
   }, {
     pattern: '* can i *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Whether or not you can (2) depends on you more than on me.',
       'Do you want to be able to (2) ?',
@@ -713,11 +579,8 @@ const keywords = [{
 }, {
   keyword: 'what',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Why do you ask ?',
       'Does that question interest you ?',
@@ -733,11 +596,8 @@ const keywords = [{
 }, {
   keyword: 'who',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: 'who *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'what' },
     ],
@@ -745,11 +605,8 @@ const keywords = [{
 }, {
   keyword: 'when',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: 'when *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'what' },
     ],
@@ -757,11 +614,8 @@ const keywords = [{
 }, {
   keyword: 'where',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: 'where *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'what' },
     ],
@@ -769,11 +623,8 @@ const keywords = [{
 }, {
   keyword: 'how',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: 'how *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'what' },
     ],
@@ -781,11 +632,8 @@ const keywords = [{
 }, {
   keyword: 'because',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Is that the real reason ?',
       "Don't any other reasons come to mind ?",
@@ -796,11 +644,8 @@ const keywords = [{
 }, {
   keyword: 'why',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: "* why don't you *",
-    regEx: null,
-    useMemFlag: false,
     responses: [
       "Do you believe I don't (2) ?",
       'Perhaps I will (2) in good time.',
@@ -810,8 +655,6 @@ const keywords = [{
     ],
   }, {
     pattern: "* why can't i *",
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Do you think you should be able to (2) ?',
       'Do you want to be able to (2) ?',
@@ -821,8 +664,6 @@ const keywords = [{
     ],
   }, {
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'what' },
     ],
@@ -830,11 +671,8 @@ const keywords = [{
 }, {
   keyword: 'everyone',
   weight: 2,
-  originalIndex: -1,
   phrases: [{
     pattern: '* @everyone *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Really, (2) ?',
       'Surely not (2).',
@@ -850,11 +688,8 @@ const keywords = [{
 }, {
   keyword: 'everybody',
   weight: 2,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'everyone' },
     ],
@@ -862,11 +697,8 @@ const keywords = [{
 }, {
   keyword: 'nobody',
   weight: 2,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'everyone' },
     ],
@@ -874,11 +706,8 @@ const keywords = [{
 }, {
   keyword: 'noone',
   weight: 2,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'everyone' },
     ],
@@ -886,11 +715,8 @@ const keywords = [{
 }, {
   keyword: 'always',
   weight: 1,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'Can you think of a specific example ?',
       'When ?',
@@ -901,11 +727,8 @@ const keywords = [{
 }, {
   keyword: 'alike',
   weight: 10,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'In what way ?',
       'What resemblence do you see ?',
@@ -920,11 +743,8 @@ const keywords = [{
 }, {
   keyword: 'like',
   weight: 10,
-  originalIndex: -1,
   phrases: [{
     pattern: '* @be *like *',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       { applyKeyword: 'alike' },
     ],
@@ -932,11 +752,8 @@ const keywords = [{
 }, {
   keyword: 'different',
   weight: 0,
-  originalIndex: -1,
   phrases: [{
     pattern: '*',
-    regEx: null,
-    useMemFlag: false,
     responses: [
       'How is it different ?',
       'What differences do you see ?',
@@ -960,12 +777,12 @@ const postTransforms = [
 ];
 
 const farewells = [
-  'Goodbye.  It was nice talking to you.',
+  'Goodbye. It was nice talking to you.',
   // additions (not original)
-  'Goodbye.  This was really a nice talk.',
-  "Goodbye.  I'm looking forward to our next session.",
-  "This was a good session, wasn't it -- but time is over now.   Goodbye.",
-  'Maybe we could discuss this moreover in our next session ?   Goodbye.',
+  'Goodbye. This was really a nice talk.',
+  "Goodbye. I'm looking forward to our next session.",
+  "This was a good session, wasn't it -- but time is over now.  Goodbye.",
+  'Maybe we could discuss this moreover in our next session?  Goodbye.',
 ];
 
 const quitCommands = [

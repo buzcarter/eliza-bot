@@ -40,7 +40,6 @@ const Tests = [
   { value: "* i don't *",          expectedResult: "\\s*(.*)\\s*\\bi\\s+don't\\b\\s*(.*)\\s*" },
   { value: "* why can't i *",      expectedResult: "\\s*(.*)\\s*\\bwhy\\s+can't\\s+i\\b\\s*(.*)\\s*" },
   { value: "* why don't you *",    expectedResult: "\\s*(.*)\\s*\\bwhy\\s+don't\\s+you\\b\\s*(.*)\\s*" },
-  { value: '$ * my *',             expectedResult: '\\s*(.*)\\s*\\bmy\\b\\s*(.*)\\s*' },
   { value: 'how *',                expectedResult: 'how\\b\\s*(.*)\\s*' },
   { value: 'when *',               expectedResult: 'when\\b\\s*(.*)\\s*' },
   { value: 'where *',              expectedResult: 'where\\b\\s*(.*)\\s*' },
@@ -55,7 +54,7 @@ describe('regExMaker', () => {
   describe('make', () => {
     Tests.forEach(({ value, expectedResult }) => {
       it(`should "correct" make regular expression "${expectedResult}"`, () => {
-        const { regEx } = regExMaker.make(value);
+        const regEx = regExMaker.make(value);
         expect(regEx).toBe(expectedResult);
       });
     });
