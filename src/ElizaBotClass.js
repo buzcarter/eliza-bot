@@ -1,13 +1,28 @@
 const { initCap, pickRandom } = require('./utils');
 const ElizaMemory = require('./elizaMemory');
-const langConfig = require('./languageConfig');
 const regExMaker = require('./regExMaker');
 const SimpleReplacements = require('./SimpleReplacements');
 
-const { NO_MATCH_KEYWORD } = langConfig;
+/**
+ * The expanded internal Keyword Phrase Object
+ * @typedef {Object} PhraseObj
+ * @property {string} pattern
+ * @property {string} regEx
+ * @property {boolean} saveForLater
+ * @property {[string|object]} responses either 'Have you eaten (2) before?' or Oject '{ applyKeyword: 'dream' }'
+ */
+
+/**
+ * The expanded internal Keyword Object
+ * @typedef {Object} KeywordObj
+ * @property {string} keyword
+ * @property {integer} originalIndex
+ * @property {int} weight
+ * @property {[PhraseObj]} phrases
+ */
 
 class ElizaBot {
-  version = null;
+  version = '1.1.1 (adapted for Node 16 (ECMAScript 2020))';
 
   // #region options
   #capitalizeFirstLetterEnabled = false;
@@ -19,20 +34,27 @@ class ElizaBot {
 
   quit = false;
 
-  keywordsList = null;
+  /** @type [KeywordObj] */
+  #keywordsList = null;
 
-  postTransformsList = null;
+  #postTransformsList = null;
 
   /** 2-Dimensional array of last {responseIndex} `[{keywordIndex}][{phraseIndex}]` */
-  lastchoice = [];
+  #lastchoice = [];
+
+  #farewells = [];
+
+  #greetings = [];
 
   #memory = false;
 
-  #dataParsed = false;
+  #quitCommands = ['quit'];
+
+  #NO_MATCH_KEYWORD = 'NOTFOUND';
 
   /**
    * Applies simple substitution rules to the reassembly rule.
-   * This is where all the ``I'''s and ``you'''s are exchanged.
+   * This is where all the `I's` and `you's` are exchanged.
    * @type SimpleReplacements
    */
   #replyPositionalSubstitutions = null;
@@ -49,68 +71,61 @@ class ElizaBot {
    * @param {boolean} opts.noRandom
    */
   constructor(opts) {
-    this.keywordsList = langConfig.keywords;
-    this.postTransformsList = langConfig.postTransforms;
+    // eslint-disable-next-line no-param-reassign
+    opts = opts || {};
 
-    const { debugEnabled, noRandom } = opts || {};
-    this.#noRandomResponsesEnabled = Boolean(noRandom);
     this.#capitalizeFirstLetterEnabled = true;
-    this.#debugEnabled = Boolean(debugEnabled);
+    this.#debugEnabled = Boolean(opts.debugEnabled);
+    this.#noRandomResponsesEnabled = Boolean(opts.noRandom);
 
-    this.version = '1.1 (original)';
+    this.#NO_MATCH_KEYWORD = opts.NO_MATCH_KEYWORD || 'NOTFOUND';
 
-    this.#memory = new ElizaMemory(opts);
-    this.#dataParsed = false;
-    if (!this.#dataParsed) {
-      this.#init();
-      this.#dataParsed = true;
+    this.#farewells = opts.farewells;
+    this.#greetings = opts.greetings;
+    this.#postTransformsList = opts.postTransforms;
+
+    this.#keywordsList = ElizaBot.#loadKeywords(opts.keywords);
+    this.#memory = new ElizaMemory({ noRandom: opts.noRandom });
+    this.#replyPositionalSubstitutions = new SimpleReplacements(opts.post);
+    this.#inputPreSubstitutions = new SimpleReplacements(opts.pres);
+
+    if (Array.isArray(opts.quitCommands) && opts.quitCommands.length) {
+      this.#quitCommands = opts.quitCommands;
     }
+
     this.reset();
   }
 
   reset() {
     this.quit = false;
     this.#memory.reset();
-    this.lastchoice = [];
+    this.#lastchoice = [];
 
-    for (let keywordIndex = 0; keywordIndex < this.keywordsList.length; keywordIndex++) {
-      this.lastchoice[keywordIndex] = [];
-      const { phrases } = this.keywordsList[keywordIndex];
+    for (let keywordIndex = 0; keywordIndex < this.#keywordsList.length; keywordIndex++) {
+      this.#lastchoice[keywordIndex] = [];
+      const { phrases } = this.#keywordsList[keywordIndex];
       for (let phraseIndex = 0; phraseIndex < phrases.length; phraseIndex++) {
-        this.lastchoice[keywordIndex][phraseIndex] = -1;
+        this.#lastchoice[keywordIndex][phraseIndex] = -1;
       }
     }
   }
 
-  #init() {
-    this.#expandKeywords();
-
-    // and compose regexps and refs for pres and posts
-    this.#replyPositionalSubstitutions = new SimpleReplacements(langConfig.post);
-    this.#inputPreSubstitutions = new SimpleReplacements(langConfig.pres);
-
-    // check for langConfig.quitCommands and install default if missing
-    if (!Array.isArray(langConfig.quitCommands)) {
-      langConfig.quitCommands = [];
-    }
-
-    // done
-    this.#dataParsed = true;
-  }
-
+  /* eslint-disable no-param-reassign */
   /**
-   * Parse langConfig data and convert it from canonical form to internal use
+   * Parse keyword definitions and convert it from canonical form to internal use
    *
    * ### Adds:
    *
    * * `keyword.originalIndex`
    * * `phrase.regEx`
    * * defaults `phrase.saveForLater` to false if not set in data;
+   *
+   * @returns {[KeywordObj]}
    */
-  #expandKeywords() {
+  static #loadKeywords(keywordDefs) {
     // check for keywords or install empty structure to prevent any errors
-    if (!Array.isArray(this.keywordsList) || !this.keywordsList.length) {
-      this.keywordsList = [{
+    if (!Array.isArray(keywordDefs) || !keywordDefs.length) {
+      keywordDefs = [{
         keyword: '###',
         originalIndex: 0,
         weight: 0,
@@ -125,9 +140,8 @@ class ElizaBot {
 
     regExMaker.init();
 
-    /* eslint-disable no-param-reassign */
     // expand synonyms and insert asterisk expressions for backtracking
-    this.keywordsList.forEach((keywordEntry, k) => {
+    keywordDefs.forEach((keywordEntry, k) => {
       // save original index for sorting
       keywordEntry.originalIndex = k;
       keywordEntry.phrases.forEach((thisPhrase) => {
@@ -137,11 +151,11 @@ class ElizaBot {
         });
       });
     });
-    /* eslint-enable no-param-reassign */
 
     // now sort keywords by weight (highest first)
-    this.keywordsList.sort(ElizaBot.#sortKeywords);
+    return keywordDefs.sort(ElizaBot.#sortKeywords);
   }
+  /* eslint-enable no-param-reassign */
 
   static #sortKeywords(a, b) {
     if (a.weight > b.weight) return -1;
@@ -179,7 +193,7 @@ class ElizaBot {
 
     parts.some((part) => {
       const sentence = this.#inputPreSubstitutions.doSubstitutions(part);
-      return this.keywordsList.some(({ keyword }, keywordIdx) => {
+      return this.#keywordsList.some(({ keyword }, keywordIdx) => {
         if (sentence.search(new RegExp(`\\b${keyword}\\b`, 'i')) >= 0) {
           reply = this.#execRule(sentence, keywordIdx);
         }
@@ -194,7 +208,7 @@ class ElizaBot {
     const parts = ElizaBot.#getSentenceFrags(inputText);
 
     // check for quit expression
-    this.quit = parts.length === 1 && langConfig.quitCommands.includes(parts[0]);
+    this.quit = parts.length === 1 && this.#quitCommands.includes(parts[0]);
     if (this.quit) {
       return this.getFarewell();
     }
@@ -211,22 +225,22 @@ class ElizaBot {
 
   getNoMatchReply() {
     const sentence = ' ';
-    const keywordIdx = this.#getRuleIndexByKey(NO_MATCH_KEYWORD);
+    const keywordIdx = this.#getRuleIndexByKey(this.#NO_MATCH_KEYWORD);
     return keywordIdx >= 0 ? this.#execRule(sentence, keywordIdx) : '';
   }
 
   #getNextResponse(keywordIndex, phraseIndex, responses) {
     let index = this.#noRandomResponsesEnabled ? 0 : Math.floor(Math.random() * responses.length);
-    const lastIndex = this.lastchoice[keywordIndex][phraseIndex];
+    const lastIndex = this.#lastchoice[keywordIndex][phraseIndex];
 
     if ((this.#noRandomResponsesEnabled && lastIndex > index) || (lastIndex === index)) {
       index = lastIndex + 1;
       if (index >= responses.length) {
         index = 0;
-        this.lastchoice[keywordIndex][phraseIndex] = -1;
+        this.#lastchoice[keywordIndex][phraseIndex] = -1;
       }
     } else {
-      this.lastchoice[keywordIndex][phraseIndex] = index;
+      this.#lastchoice[keywordIndex][phraseIndex] = index;
     }
 
     return responses[index];
@@ -263,7 +277,7 @@ class ElizaBot {
    * @returns {string} statement
    */
   #execRule(sentence, keywordIdx) {
-    const { keyword, phrases, weight } = this.keywordsList[keywordIdx];
+    const { keyword, phrases, weight } = this.#keywordsList[keywordIdx];
 
     let reply = '';
 
@@ -307,8 +321,8 @@ class ElizaBot {
       .replace(/\s{2,}/g, ' ')
       .replace(/\s+([.?!])/g, '$1');
 
-    if (Array.isArray(this.postTransformsList)) {
-      this.postTransformsList.forEach(({ pattern, replacement }) => {
+    if (Array.isArray(this.#postTransformsList)) {
+      this.#postTransformsList.forEach(({ pattern, replacement }) => {
         text = text.replace(pattern, replacement);
       });
     }
@@ -318,17 +332,17 @@ class ElizaBot {
   /* eslint-enable no-param-reassign */
 
   #getRuleIndexByKey(key) {
-    return this.keywordsList.findIndex(({ keyword }) => keyword === key);
+    return this.#keywordsList.findIndex(({ keyword }) => keyword === key);
   }
 
   // eslint-disable-next-line class-methods-use-this
   getFarewell() {
-    return pickRandom(langConfig.farewells);
+    return pickRandom(this.#farewells);
   }
 
   // eslint-disable-next-line class-methods-use-this
   getGreeting() {
-    return pickRandom(langConfig.greetings);
+    return pickRandom(this.#greetings);
   }
 }
 

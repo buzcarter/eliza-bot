@@ -1,5 +1,6 @@
 const ElizaBot = require('./ElizaBotClass');
 const { pickRandom } = require('./utils');
+const langConfig = require('./languageConfig');
 
 const silencePrompts = [
   'You seem distracted. Should we resume later?',
@@ -23,7 +24,10 @@ const options = {
 let bot = null;
 
 // eslint-disable-next-line no-return-assign
-const getBot = () => (bot || (bot = new ElizaBot(options)));
+const getBot = () => (bot || (bot = new ElizaBot({
+  ...options,
+  ...langConfig,
+})));
 
 module.exports = {
   reply(inputText) {
