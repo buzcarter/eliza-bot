@@ -64,7 +64,7 @@ const keywords = [{
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'sorry' },
+      { applyKeyword: 'sorry' },
     ],
   }],
 }, {
@@ -93,7 +93,7 @@ const keywords = [{
       'Why do you think I should recall (2) now ?',
       'What about (2) ?',
       'You mentioned (2) ?',
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }, {
     pattern: '* you remember *',
@@ -102,7 +102,7 @@ const keywords = [{
     responses: [
       'How could I forget (2) ?',
       'What about (2) should I remember ?',
-      { goto: 'you' },
+      { applyKeyword: 'you' },
     ],
   }],
 }, {
@@ -132,7 +132,7 @@ const keywords = [{
       'Would it bother you if I forgot (2) ?',
       'Why should I recall (2) just now ?',
       'Tell me more about (2).',
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }],
 }, {
@@ -165,7 +165,7 @@ const keywords = [{
       'Really, (2) ?',
       'Have you ever fantasized (2) while you were awake ?',
       'Have you ever dreamed (2) before ?',
-      { goto: 'dream' },
+      { applyKeyword: 'dream' },
     ],
   }],
 }, {
@@ -225,7 +225,7 @@ const keywords = [{
     responses: [
       'Sorry I do not sprechen sie deutsch',
       "I told you before, I don't understand German.",
-      { goto: 'xforeign' },
+      { applyKeyword: 'xforeign' },
     ],
   }],
 }, {
@@ -239,7 +239,7 @@ const keywords = [{
     responses: [
       'Why? Do you love to go to France?',
       "I told you before, I don't understand French.",
-      { goto: 'xforeign' },
+      { applyKeyword: 'xforeign' },
     ],
   }],
 }, {
@@ -253,7 +253,7 @@ const keywords = [{
     responses: [
       'Have you been to Rome?',
       "I told you before, I don't understand Italian.",
-      { goto: 'xforeign' },
+      { applyKeyword: 'xforeign' },
     ],
   }],
 }, {
@@ -267,7 +267,7 @@ const keywords = [{
     responses: [
       'Sorry I do not speak Spanish',
       "I told you before, I don't understand Spanish.",
-      { goto: 'xforeign' },
+      { applyKeyword: 'xforeign' },
     ],
   }],
 }, {
@@ -326,14 +326,14 @@ const keywords = [{
       'Would you want to be (2) ?',
       'Do you wish I would tell you you are (2) ?',
       'What would it mean if you were (2) ?',
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }, {
     pattern: '* i am *',
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'i' },
+      { applyKeyword: 'i' },
     ],
   }, {
     pattern: '*',
@@ -359,14 +359,14 @@ const keywords = [{
       'Do you sometimes think I am (2) ?',
       'Would it matter to you ?',
       'What if I were (2) ?',
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }, {
     pattern: '* you are *',
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'you' },
+      { applyKeyword: 'you' },
     ],
   }, {
     pattern: '* are *',
@@ -412,7 +412,7 @@ const keywords = [{
       'Were you (2) ?',
       'What would it mean if you were (2) ?',
       "What does ' (2) ' suggest to you ?",
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }, {
     pattern: '* i was *',
@@ -475,7 +475,7 @@ const keywords = [{
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'was' },
+      { applyKeyword: 'was' },
     ],
   }, {
     pattern: '* i @belief i *',
@@ -491,7 +491,7 @@ const keywords = [{
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'you' },
+      { applyKeyword: 'you' },
     ],
   }, {
     pattern: '* i am *',
@@ -569,7 +569,7 @@ const keywords = [{
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'alike' },
+      { applyKeyword: 'alike' },
     ],
   }, {
     pattern: '* you are *',
@@ -697,7 +697,7 @@ const keywords = [{
       "You believe I can (2) don't you ?",
       'You want me to be able to (2).',
       'Perhaps you would like to be able to (2) yourself.',
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }, {
     pattern: '* can i *',
@@ -707,7 +707,7 @@ const keywords = [{
       'Whether or not you can (2) depends on you more than on me.',
       'Do you want to be able to (2) ?',
       "Perhaps you don't want to (2).",
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }],
 }, {
@@ -739,7 +739,7 @@ const keywords = [{
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }],
 }, {
@@ -751,7 +751,7 @@ const keywords = [{
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }],
 }, {
@@ -763,7 +763,7 @@ const keywords = [{
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }],
 }, {
@@ -775,7 +775,7 @@ const keywords = [{
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }],
 }, {
@@ -806,7 +806,7 @@ const keywords = [{
       'Perhaps I will (2) in good time.',
       'Should you (2) yourself ?',
       'You want me to (2) ?',
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }, {
     pattern: "* why can't i *",
@@ -817,14 +817,14 @@ const keywords = [{
       'Do you want to be able to (2) ?',
       'Do you believe this will help you to (2) ?',
       "Have you any idea why you can't (2) ?",
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }, {
     pattern: '*',
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'what' },
+      { applyKeyword: 'what' },
     ],
   }],
 }, {
@@ -856,7 +856,7 @@ const keywords = [{
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'everyone' },
+      { applyKeyword: 'everyone' },
     ],
   }],
 }, {
@@ -868,7 +868,7 @@ const keywords = [{
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'everyone' },
+      { applyKeyword: 'everyone' },
     ],
   }],
 }, {
@@ -880,7 +880,7 @@ const keywords = [{
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'everyone' },
+      { applyKeyword: 'everyone' },
     ],
   }],
 }, {
@@ -926,7 +926,7 @@ const keywords = [{
     regEx: null,
     useMemFlag: false,
     responses: [
-      { goto: 'alike' },
+      { applyKeyword: 'alike' },
     ],
   }],
 }, {

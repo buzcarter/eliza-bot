@@ -262,8 +262,8 @@ class ElizaBot {
         console.log(`execRule match:\n  key: ${keyword}\n  weight: ${weight}\n  pattern: ${phrase.pattern}\n  regEx: ${phrase.regEx}\n  reasmb: ${reply}\n  useMemFlag: ${phrase.useMemFlag}`);
       }
 
-      if (reply.goto) {
-        const gotoIdx = this.#getRuleIndexByKey(reply.goto);
+      if (reply.applyKeyword) {
+        const gotoIdx = this.#getRuleIndexByKey(reply.applyKeyword);
         reply = gotoIdx > -1 ? this.#execRule(sentence, gotoIdx) : this.getNoMatchReply();
         return true;
       }
