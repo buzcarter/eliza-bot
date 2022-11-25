@@ -175,22 +175,19 @@ class ElizaBot {
 
   #checkKeywordsReply(parts) {
     let reply = '';
-    for (let i = 0; i < parts.length; i++) {
-      let part = parts[i];
 
+    parts.some((part) => {
+      // eslint-disable-next-line no-param-reassign
       part = this.#elizaPres.doSubstitutions(part);
       this.sentence = part;
-      // loop trough keywords
-      for (let k = 0; k < this.keywordsList.length; k++) {
-        const { keyword } = this.keywordsList[k];
+
+      return this.keywordsList.some(({ keyword }, keywordIdx) => {
         if (part.search(new RegExp(`\\b${keyword}\\b`, 'i')) >= 0) {
-          reply = this.#execRule(k);
+          reply = this.#execRule(keywordIdx);
         }
-        if (reply !== '') {
-          return reply;
-        }
-      }
-    }
+        return reply;
+      });
+    });
 
     return reply;
   }
@@ -204,10 +201,10 @@ class ElizaBot {
       return this.getFarewell();
     }
 
-    // Make reply based on Keyword.
+    // Find reply based on a Keyword.
     // Nothing matched? Try memory.
-    // Nothing in memory? Get "no match".
-    // Ugh?! Still nothing? Say hardcoded response.
+    // Nothing in memory? Get "no match" response.
+    // Ugh?! Still nothing? Use a hardcoded reply.
     return this.#checkKeywordsReply(parts)
       || this.#elizaMemory.get()
       || this.getNoMatchReply()
@@ -238,19 +235,19 @@ class ElizaBot {
   }
 
   /**
-   * @param {int} keywordIndex
+   * @param {int} keywordIdx
    * @returns {string} statement
    */
-  #execRule(keywordIndex) {
+  #execRule(keywordIdx) {
     const paramRegEx = /\(([0-9]+)\)/;
-    const { keyword, phrases, weight } = this.keywordsList[keywordIndex];
+    const { keyword, phrases, weight } = this.keywordsList[keywordIdx];
     for (let phraseIndex = 0; phraseIndex < phrases.length; phraseIndex++) {
       const thisPhrase = phrases[phraseIndex];
       const m = this.sentence.match(thisPhrase.regEx);
       if (m !== null) {
         const { responses, useMemFlag } = thisPhrase;
 
-        let reply = this.#getNextResponse(keywordIndex, phraseIndex, responses);
+        let reply = this.#getNextResponse(keywordIdx, phraseIndex, responses);
         if (this.#debugEnabled) {
           // eslint-disable-next-line no-console
           console.log(`execRule match:\n  key: ${keyword}\n  weight: ${weight}\n  pattern: ${thisPhrase.pattern}\n  regEx: ${thisPhrase.regEx}\n  reasmb: ${reply}\n  useMemFlag: ${useMemFlag}`);
