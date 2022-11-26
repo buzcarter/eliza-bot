@@ -1,10 +1,12 @@
 # Eliza Bot
 
+http://www.cs.cmu.edu/~msharifi/speechlab/Eliza.html
+
 (Copied from [elisabot-js](https://github.com/brandongmwong/elizabot-js))
 
 ## What is this?
 
-![Eliza](eliza.png)
+![Eliza](./docs/images/eliza.png)
 
 * JavasScript bot based on Eliza - www.masswerk.at/elizabot and http://en.wikipedia.org/wiki/ELIZA
 
@@ -12,7 +14,7 @@
 
 ## Usage
 
-```
+```js
 var elizabot = require('./elizabot.js');
 elizabot.start()          // initializes eliza and returns a greeting message
 elizabot.reply(msgtext)   // returns a eliza-like reply based on the message text passed into it
@@ -76,4 +78,3 @@ Does talking about this bother you ?
 ---
 This was a good session, wasn't it -- but time is over now.   Goodbye.
 ```
-

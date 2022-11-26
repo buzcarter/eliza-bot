@@ -1,1 +1,4 @@
-tags
+# **/*.gitignore
+.DS_Store
+coverage/
+node_modules/

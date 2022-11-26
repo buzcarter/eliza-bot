@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [{
+    "name": "App",
+    "request": "launch",
+    "type": "node",
+    "program": "${workspaceRoot}/index.js",
+    "console": "integratedTerminal",
+    "args": []
+  }, {
+    "name": "Jest",
+    "internalConsoleOptions": "openOnSessionStart",
+    "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+    "request": "launch",
+    "type": "node",
+    "args": [
+      "-i"
+    ]
+  }, {
+    "name": "One Jest Module",
+    "internalConsoleOptions": "openOnSessionStart",
+    "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+    "request": "launch",
+    "type": "node",
+    "args": [
+      "-i",
+      "elizPres.test.js"
+    ]
+  }]
+}
