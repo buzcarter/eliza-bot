@@ -1,6 +1,6 @@
 {
   "name": "eliza-bot",
-  "version": "1.0.0",
+  "version": "1.1.!",
   "description": "JavaScript implementation of ELIZA chatbot",
   "main": "index.js",
   "engines": {
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oren/eliza-bot.git"
+    "url": "git+https://github.com/buzcarter/eliza-bot.git"
   },
   "keywords": [
     "bot",
@@ -28,9 +28,9 @@
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/oren/eliza-bot/issues"
+    "url": "https://github.com/buzcarter/eliza-bot/issues"
   },
-  "homepage": "https://github.com/oren/eliza-bot#readme",
+  "homepage": "https://github.com/buzcarter/eliza-bot#readme",
   "devDependencies": {
     "eslint": "^8.26.0",
     "eslint-config-airbnb-base": "^15.0.0",
